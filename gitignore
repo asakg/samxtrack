@@ -1,9 +1,18 @@
-venv/
+# macOS system files
+.DS_Store
+**/.DS_Store
+
+# Python cache
 __pycache__/
-*.pyc
-instance/
-.env
-*.sqlite3
-__pycache__/
-*.pyc
+**/__pycache__/
+*.py[cod]
+
+# Flask session data
 flask_session/
+
+# Ignore venv
+venv/
+
+# Ignore compiled files
+*.pyc
+*.pyo
