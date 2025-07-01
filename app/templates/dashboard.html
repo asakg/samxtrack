@@ -1,57 +1,48 @@
-{% extends "base.html" %}
-
-{% block title %}Dashboard | SamXTrack{% endblock %}
-
-{% block header %}Loan Overview{% endblock %}
+{% extends 'base.html' %}
 
 {% block content %}
+<h2 class="mb-4">Loan Overview</h2>
+
 <div class="row mb-4">
-  <div class="col-md-4">
-    <div class="card shadow-sm">
-      <div class="card-body">
-        <h6 class="text-muted">Total Loans</h6>
-        <h3 class="fw-bold">--</h3>
-      </div>
+    <div class="col-md-4">
+        <div class="card p-3 text-center">
+            <h5>Total Loans</h5>
+            <p>--</p>
+        </div>
     </div>
-  </div>
-  <div class="col-md-4">
-    <div class="card shadow-sm">
-      <div class="card-body">
-        <h6 class="text-muted">Past Due</h6>
-        <h3 class="fw-bold text-danger">--</h3>
-      </div>
+    <div class="col-md-4">
+        <div class="card p-3 text-center">
+            <h5>Past Due</h5>
+            <p>--</p>
+        </div>
     </div>
-  </div>
-  <div class="col-md-4">
-    <div class="card shadow-sm">
-      <div class="card-body">
-        <h6 class="text-muted">Paid Off</h6>
-        <h3 class="fw-bold text-success">--</h3>
-      </div>
+    <div class="col-md-4">
+        <div class="card p-3 text-center">
+            <h5>Paid Off</h5>
+            <p>--</p>
+        </div>
     </div>
-  </div>
 </div>
 
-<!-- Table placeholder -->
-<div class="card shadow-sm">
-  <div class="card-body">
-    <h5 class="card-title">Loan Details</h5>
-    <div class="table-responsive">
-      <table class="table table-striped table-hover">
-        <thead class="table-light">
-          <tr>
-            <th>Borrower</th>
-            <th>Phone</th>
-            <th>Status</th>
-            <th>Next Due</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Dynamic rows will go here -->
-        </tbody>
-      </table>
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Loan Details</h5>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Borrower</th>
+                        <th>Phone</th>
+                        <th>Status</th>
+                        <th>Next Due</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Your data will go here -->
+                </tbody>
+            </table>
+        </div>
     </div>
-  </div>
 </div>
 {% endblock %}
