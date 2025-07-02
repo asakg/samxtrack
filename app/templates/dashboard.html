@@ -1,48 +1,143 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SamXTrack Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f4f7fa;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .summary-card {
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      padding: 20px;
+      background-color: #fff;
+    }
+    .risk-critical { background-color: #f8d7da; color: #721c24; }
+    .risk-high { background-color: #fff3cd; color: #856404; }
+    .risk-medium { background-color: #d1ecf1; color: #0c5460; }
+    .risk-safe { background-color: #d4edda; color: #155724; }
+    .badge-status {
+      font-size: 0.85rem;
+      padding: 0.5em 0.75em;
+      border-radius: 0.5rem;
+    }
+    .table-container {
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container py-4">
+    <h2 class="mb-4 text-center">📊 SamXTrack Loan Dashboard</h2>
 
-{% block content %}
-<h2 class="mb-4">Loan Overview</h2>
+    <!-- Summary Cards -->
+    <div class="row g-4 mb-4">
+      <div class="col-md-4">
+        <div class="summary-card text-center">
+          <h5>Total Loans</h5>
+          <h3>{{ total_loans }}</h3>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="summary-card text-center">
+          <h5>Critical Loans</h5>
+          <h3 class="text-danger">{{ critical_loans }}</h3>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="summary-card text-center">
+          <h5>Active Borrowers</h5>
+          <h3>{{ active_borrowers }}</h3>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="summary-card text-center">
+          <h5>Loans w/ Title</h5>
+          <h3>{{ with_title }}</h3>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="summary-card text-center">
+          <h5>Missing Contract</h5>
+          <h3 class="text-warning">{{ no_contract }}</h3>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="summary-card text-center">
+          <h5>With Guarantor</h5>
+          <h3>{{ with_guarantor }}</h3>
+        </div>
+      </div>
+    </div>
 
-<div class="row mb-4">
-    <div class="col-md-4">
-        <div class="card p-3 text-center">
-            <h5>Total Loans</h5>
-            <p>--</p>
-        </div>
+    <!-- Data Table -->
+    <div class="table-container">
+      <table class="table table-bordered table-hover bg-white">
+        <thead class="table-light">
+          <tr>
+            <th>Borrower</th>
+            <th>Status</th>
+            <th>Risk</th>
+            <th>Activity</th>
+            <th>Title</th>
+            <th>Contract</th>
+            <th>Guarantor</th>
+            <th>Balance</th>
+            <th>Next Payment</th>
+            <th>Payment Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in df %}
+          <tr>
+            <td>{{ row['Borrower'] }}</td>
+            <td>{{ row['Status'] }}</td>
+            <td>
+              {% if row['Risk Level'] == 'Critical' %}
+                <span class="badge bg-danger">Critical</span>
+              {% elif row['Risk Level'] == 'High Risk' %}
+                <span class="badge bg-warning text-dark">High</span>
+              {% elif row['Risk Level'] == 'At Risk' %}
+                <span class="badge bg-info text-dark">At Risk</span>
+              {% elif row['Risk Level'] == 'Paid' %}
+                <span class="badge bg-success">Paid</span>
+              {% else %}
+                <span class="badge bg-secondary">Unknown</span>
+              {% endif %}
+            </td>
+            <td>{{ row['Activity Status'] }}</td>
+            <td>
+              {% if row['Has Title'] %}
+                ✅
+              {% else %}
+                ❌
+              {% endif %}
+            </td>
+            <td>
+              {% if row['Has Contract'] %}
+                ✅
+              {% else %}
+                ❌
+              {% endif %}
+            </td>
+            <td>
+              {% if row['Has Guarantor'] %}
+                ✅
+              {% else %}
+                ❌
+              {% endif %}
+            </td>
+            <td>${{ row['Principal Balance'] }}</td>
+            <td>${{ row['Next Payment Amount'] }}</td>
+            <td>{{ row['Payment Date'] }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
-    <div class="col-md-4">
-        <div class="card p-3 text-center">
-            <h5>Past Due</h5>
-            <p>--</p>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card p-3 text-center">
-            <h5>Paid Off</h5>
-            <p>--</p>
-        </div>
-    </div>
-</div>
-
-<div class="card">
-    <div class="card-body">
-        <h5 class="card-title">Loan Details</h5>
-        <div class="table-responsive">
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Borrower</th>
-                        <th>Phone</th>
-                        <th>Status</th>
-                        <th>Next Due</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Your data will go here -->
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-{% endblock %}
+  </div>
+</body>
+</html>
