@@ -1,0 +1,52 @@
+<!-- Block 3: Loan Portfolio Stats -->
+<div class="bg-white shadow rounded-xl p-6 mt-6">
+  <h2 class="text-lg font-semibold mb-4 text-gray-800">Loan Portfolio Stats</h2>
+  <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 text-sm text-gray-700">
+
+    <div class="p-4 bg-gray-50 rounded-lg">
+      <div class="font-semibold text-gray-500">Outstanding Principal</div>
+      <div class="text-xl font-bold text-gray-900">${{ stats.total_outstanding }}</div>
+    </div>
+
+    <div class="p-4 bg-gray-50 rounded-lg">
+      <div class="font-semibold text-gray-500">Weekly Due Total</div>
+      <div class="text-xl font-bold text-gray-900">${{ stats.total_weekly_due }}</div>
+    </div>
+
+    <div class="p-4 bg-gray-50 rounded-lg">
+      <div class="font-semibold text-gray-500">Avg. Weekly Payment</div>
+      <div class="text-xl font-bold text-gray-900">${{ stats.avg_weekly_payment }}</div>
+    </div>
+
+    <div class="p-4 bg-gray-50 rounded-lg">
+      <div class="font-semibold text-gray-500">Avg. Weeks Remaining</div>
+      <div class="text-xl font-bold text-gray-900">{{ stats.avg_weeks_remaining }}</div>
+    </div>
+
+    <div class="p-4 bg-gray-50 rounded-lg">
+      <div class="font-semibold text-gray-500">Loans Past Due</div>
+      <div class="text-xl font-bold text-red-600">{{ stats.past_due_count }}</div>
+    </div>
+
+    <div class="p-4 bg-gray-50 rounded-lg">
+      <div class="font-semibold text-gray-500">3+ Weeks Late</div>
+      <div class="text-xl font-bold text-red-600">{{ stats.critical_late_count }}</div>
+    </div>
+
+    <div class="p-4 bg-gray-50 rounded-lg">
+      <div class="font-semibold text-gray-500">No Contract / Title</div>
+      <div class="text-xl font-bold text-yellow-600">{{ stats.unsecured_loans }}</div>
+    </div>
+
+    <div class="p-4 bg-gray-50 rounded-lg">
+      <div class="font-semibold text-gray-500">Drivers With Loans</div>
+      <div class="text-xl font-bold text-gray-900">{{ stats.unique_borrowers }}</div>
+    </div>
+
+    <div class="p-4 bg-gray-50 rounded-lg">
+      <div class="font-semibold text-gray-500">% Paid Off</div>
+      <div class="text-xl font-bold text-green-700">{{ stats.percent_paid_off }}%</div>
+    </div>
+
+  </div>
+</div>
