@@ -85,7 +85,7 @@ def dashboard_home():
     "% Paid Off": f"{stats['percent_paid_off']}%"
     }
     medium_risk_df = df[
-    (df["Risk Level"] == "Medium") & ~((df["Status"].str.lower() == "finished") & (df["Principal Balance"] == 0))]
+    (df["Risk Level"] == "Medium")]
 
     return render_template(
         "dashboard.html",
