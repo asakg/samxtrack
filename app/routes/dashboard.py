@@ -56,7 +56,7 @@ def dashboard_home():
     "total_outstanding": round(df["Principal Balance"].sum(), 2),
     "total_weekly_due": round(df["Next Payment Amount"].sum(), 2),
     "avg_weekly_payment": round(df[df["Next Payment Amount"] > 0]["Next Payment Amount"].mean(), 2),
-    "avg_weeks_remaining": int(df["Remaining payments"].mean()),
+    "avg_weeks_remaining": int(df["Remaining Payments"].mean()),
     "past_due_count": len(df[df["Day Late"] > 0]),
     "critical_late_count": len(df[df["Day Late"] > 21]),
     "unsecured_loans": len(df[(df["Has Contract"] == False) | (df["Has Title"] == False)]),
