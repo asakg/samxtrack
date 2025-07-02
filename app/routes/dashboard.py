@@ -10,6 +10,19 @@ def dashboard_home():
 
     df = load_latest_loans()
 
+    #Add "Risk Level" column dynamically
+    def determine_risk(row):
+        if row.get("Days Late", 0) >= 21:
+            return "Critical"
+        elif row.get("Days Late", 0) >= 7:
+            return "Medium"
+        elif row.get("Has Title") == False or row.get("Has Contract") == False:
+            return "Medium"
+        else:
+            return "Low"
+
+    df["Risk Level"] = df.apply(determine_risk, axis=1)
+
     # Pre-compute stats
     total_loans = len(df)
     critical_loans = len(df[df["Risk Level"] == "Critical"])
