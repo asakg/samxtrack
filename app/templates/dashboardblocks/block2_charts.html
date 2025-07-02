@@ -1,101 +1,122 @@
-<div class="col-md-12">
-    <div class="row g-4">
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-        <!-- Loan Status -->
-        <div class="col-md-4">
-            <div class="card shadow-sm">
-                <div class="card-header fw-bold">Loan Status</div>
-                <div class="card-body">
-                    <canvas id="loanStatusChart" height="200"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Risk Distribution -->
-        <div class="col-md-4">
-            <div class="card shadow-sm">
-                <div class="card-header fw-bold">Risk Distribution</div>
-                <div class="card-body">
-                    <canvas id="riskDistributionChart" height="200"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Borrower Activity -->
-        <div class="col-md-4">
-            <div class="card shadow-sm">
-                <div class="card-header fw-bold">Borrower Activity</div>
-                <div class="card-body">
-                    <canvas id="borrowerActivityChart" height="200"></canvas>
-                </div>
-            </div>
-        </div>
-
+<div class="row g-4 mt-2">
+  <!-- Chart 1: Loan Status -->
+  <div class="col-md-4">
+    <div class="card shadow-sm">
+      <div class="card-header fw-bold">Loan Status</div>
+      <div class="card-body">
+        <canvas id="loanStatusChart" height="200"></canvas>
+      </div>
     </div>
+  </div>
 
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Chart 2: Risk Distribution -->
+  <div class="col-md-4">
+    <div class="card shadow-sm">
+      <div class="card-header fw-bold">Risk Distribution</div>
+      <div class="card-body">
+        <canvas id="riskChart" height="200"></canvas>
+      </div>
+    </div>
+  </div>
 
-    <script>
-        // Pass JSON safely
-        const chartsData = {{ charts_data | tojson }};
-
-        const loanStatusData = {
-            labels: Object.keys(chartsData.loan_status),
-            datasets: [{
-                data: Object.values(chartsData.loan_status),
-                backgroundColor: ['#10b981', '#f59e0b']
-            }]
-        };
-
-        const riskDistributionData = {
-            labels: Object.keys(chartsData.risk_distribution),
-            datasets: [{
-                data: Object.values(chartsData.risk_distribution),
-                backgroundColor: ['#ef4444', '#a3e635']
-            }]
-        };
-
-        const borrowerActivityData = {
-            labels: Object.keys(chartsData.borrower_activity),
-            datasets: [{
-                data: Object.values(chartsData.borrower_activity),
-                backgroundColor: ['#3b82f6', '#d1d5db']
-            }]
-        };
-
-        // Render charts
-        new Chart(document.getElementById('loanStatusChart'), {
-            type: 'doughnut',
-            data: loanStatusData,
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { position: 'bottom' }
-                }
-            }
-        });
-
-        new Chart(document.getElementById('riskDistributionChart'), {
-            type: 'doughnut',
-            data: riskDistributionData,
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { position: 'bottom' }
-                }
-            }
-        });
-
-        new Chart(document.getElementById('borrowerActivityChart'), {
-            type: 'doughnut',
-            data: borrowerActivityData,
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { position: 'bottom' }
-                }
-            }
-        });
-    </script>
+  <!-- Chart 3: Borrower Activity -->
+  <div class="col-md-4">
+    <div class="card shadow-sm">
+      <div class="card-header fw-bold">Borrower Activity</div>
+      <div class="card-body">
+        <canvas id="borrowerActivityChart" height="200"></canvas>
+      </div>
+    </div>
+  </div>
 </div>
+
+<!-- More charts -->
+<div class="row g-4 mt-2">
+  <!-- Chart 4: Payment Status -->
+  <div class="col-md-6">
+    <div class="card shadow-sm">
+      <div class="card-header fw-bold">Payment Status</div>
+      <div class="card-body">
+        <canvas id="paymentStatusChart" height="200"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chart 5: Collateral -->
+  <div class="col-md-6">
+    <div class="card shadow-sm">
+      <div class="card-header fw-bold">Title Status</div>
+      <div class="card-body">
+        <canvas id="collateralChart" height="200"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Pass chart data safely
+  const chartsData = JSON.parse('{{ charts_data | tojson | safe }}');
+
+  // Chart 1: Loan Status
+  new Chart(document.getElementById("loanStatusChart"), {
+    type: "doughnut",
+    data: {
+      labels: Object.keys(chartsData.loan_status),
+      datasets: [{
+        data: Object.values(chartsData.loan_status),
+        backgroundColor: ["#10b981", "#f59e0b"]
+      }]
+    }
+  });
+
+  // Chart 2: Risk Distribution
+  new Chart(document.getElementById("riskChart"), {
+    type: "doughnut",
+    data: {
+      labels: Object.keys(chartsData.risk_distribution),
+      datasets: [{
+        data: Object.values(chartsData.risk_distribution),
+        backgroundColor: ["#ef4444", "#3a3e63"]
+      }]
+    }
+  });
+
+  // Chart 3: Borrower Activity
+  new Chart(document.getElementById("borrowerActivityChart"), {
+    type: "doughnut",
+    data: {
+      labels: Object.keys(chartsData.borrower_activity),
+      datasets: [{
+        data: Object.values(chartsData.borrower_activity),
+        backgroundColor: ["#3b82f6", "#d1d5db"]
+      }]
+    }
+  });
+
+  // Chart 4: Payment Status
+  new Chart(document.getElementById("paymentStatusChart"), {
+    type: "doughnut",
+    data: {
+      labels: Object.keys(chartsData.payment_status),
+      datasets: [{
+        data: Object.values(chartsData.payment_status),
+        backgroundColor: ["#6366f1", "#facc15", "#f87171", "#34d399", "#9ca3af"]
+      }]
+    }
+  });
+
+  // Chart 5: Collateral (Title)
+  new Chart(document.getElementById("collateralChart"), {
+    type: "doughnut",
+    data: {
+      labels: Object.keys(chartsData.collateral),
+      datasets: [{
+        data: Object.values(chartsData.collateral),
+        backgroundColor: ["#0ea5e9", "#f43f5e"]
+      }]
+    }
+  });
+</script>
