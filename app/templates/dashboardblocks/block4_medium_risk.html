@@ -15,50 +15,85 @@
                             <th></th>
                         </tr>
                     </thead>
-                    <tbody>
-                        {% for row in medium_risk_rows %}
-                        <tr>
-                            <td>{{ row["Borrower"] }}</td>
-                            <td><span class="badge bg-warning text-dark">{{ row["Status"] }}</span></td>
-                            <td>${{ "{:,}".format(row["Principal Balance"]) }}</td>
-                            <td>
-                                {% if row["Contract"] != '✔' %}<span class="badge bg-danger">No Contract</span> {% endif %}
-                                {% if row["Title Ownership"] != '✔' %}<span class="badge bg-danger">No Title</span> {% endif %}
-                            </td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#loanModal{{ loop.index }}">Details</button>
-                            </td>
-                        </tr>
-
-                        <!-- Modal View per Borrower -->
-                        <div class="modal fade" id="loanModal{{ loop.index }}" tabindex="-1">
-                            <div class="modal-dialog modal-dialog-centered">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title">Loan Details - {{ row["Borrower"] }}</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <ul class="list-group">
-                                            <li class="list-group-item"><strong>Status:</strong> {{ row["Status"] }}</li>
-                                            <li class="list-group-item"><strong>Balance:</strong> ${{ "{:,}".format(row["Principal Balance"]) }}</li>
-                                            <li class="list-group-item"><strong>Last Week Collected:</strong> {{ row["Last W Collected"] }}</li>
-                                            <li class="list-group-item"><strong>Title:</strong> {{ row["Title Ownership"] }}</li>
-                                            <li class="list-group-item"><strong>Contract:</strong> {{ row["Contract"] }}</li>
-                                            <li class="list-group-item"><strong>Guarantor:</strong> {{ row["Guarantor"] }}</li>
-                                            <li class="list-group-item"><strong>Next Payment:</strong> ${{ row["Next Payment Amount"] }}</li>
-                                            <li class="list-group-item"><strong>Payment Date:</strong> {{ row["Payment Date"] }}</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {% endfor %}
+                    <tbody id="mediumRiskBody">
+                        <!-- JS will populate rows -->
                     </tbody>
                 </table>
             </div>
 
+            <!-- Show More / Less Button -->
+            <div class="text-end mt-2">
+                <button class="btn btn-sm btn-secondary" id="toggleMore">Show More</button>
+            </div>
         </div>
     </div>
 </div>
+
+<!-- JS Logic -->
+<script>
+    const fullRows = JSON.parse('{{ medium_risk_rows | tojson | safe }}');
+    const tableBody = document.getElementById("mediumRiskBody");
+    const toggleBtn = document.getElementById("toggleMore");
+    let showingAll = false;
+
+    // Filter out rows with "Finished" status
+    const filteredRows = fullRows.filter(row => row.Status !== "Finished");
+
+    function renderRow(row, index) {
+        const balance = parseFloat(row["Principal Balance"] || 0).toLocaleString();
+        const badges = [
+            row["Has Contract"] ? "" : '<span class="badge bg-danger">No Contract</span>',
+            row["Has Title"] ? "" : '<span class="badge bg-danger">No Title</span>'
+        ].join(' ');
+
+        return `
+            <tr>
+                <td>${row.Borrower}</td>
+                <td><span class="badge bg-warning text-dark">${row.Status}</span></td>
+                <td>$${balance}</td>
+                <td>${badges}</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#loanModal${index}">Details</button>
+                </td>
+            </tr>
+
+            <!-- Modal -->
+            <div class="modal fade" id="loanModal${index}" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Loan Details - ${row.Borrower}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <ul class="list-group">
+                                <li class="list-group-item"><strong>Status:</strong> ${row.Status}</li>
+                                <li class="list-group-item"><strong>Balance:</strong> $${balance}</li>
+                                <li class="list-group-item"><strong>Last Week Collected:</strong> ${row.LastWCollected}</li>
+                                <li class="list-group-item"><strong>Title:</strong> ${row.HasTitle ? '✔' : '✘'}</li>
+                                <li class="list-group-item"><strong>Contract:</strong> ${row.HasContract ? '✔' : '✘'}</li>
+                                <li class="list-group-item"><strong>Guarantor:</strong> ${row.Guarantor || '—'}</li>
+                                <li class="list-group-item"><strong>Next Payment:</strong> $${parseFloat(row.NextPayment || 0).toLocaleString()}</li>
+                                <li class="list-group-item"><strong>Payment Date:</strong> ${row.PaymentDate}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderTable(showAll) {
+        const rowsToRender = showAll ? filteredRows : filteredRows.slice(0, 5);
+        tableBody.innerHTML = rowsToRender.map(renderRow).join('');
+    }
+
+    // Initial render
+    renderTable(false);
+
+    toggleBtn.onclick = () => {
+        showingAll = !showingAll;
+        renderTable(showingAll);
+        toggleBtn.innerText = showingAll ? "Show Less" : "Show More";
+    };
+</script>
