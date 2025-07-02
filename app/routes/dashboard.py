@@ -57,8 +57,8 @@ def dashboard_home():
     "total_weekly_due": round(df["Next Payment Amount"].sum(), 2),
     "avg_weekly_payment": round(df[df["Next Payment Amount"] > 0]["Next Payment Amount"].mean(), 2),
     "avg_weeks_remaining": int(df["Remaining Payments"].mean()),
-    "past_due_count": len(df[df["Day Late"] > 0]),
-    "critical_late_count": len(df[df["Day Late"] > 21]),
+    "past_due_count": len(df[df["Days Late"] > 0]),
+    "critical_late_count": len(df[df["Days Late"] > 21]),
     "unsecured_loans": len(df[(df["Has Contract"] == False) | (df["Has Title"] == False)]),
     "unique_borrowers": df["Group"].nunique(),
     "percent_paid_off": round((len(df[df["Principal Balance"] == 0]) / len(df)) * 100, 1)
