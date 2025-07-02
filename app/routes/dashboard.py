@@ -64,9 +64,18 @@ def dashboard_home():
     "percent_paid_off": round((len(df[df["Principal Balance"] == 0]) / len(df)) * 100, 1)
     })
 
+    stats_block3 = {
+    "Outstanding Principal": f"${stats['total_outstanding']:,.2f}",
+    "Loans Past Due": stats["past_due_count"],
+    "3+ Weeks Late": stats["critical_late_count"],
+    "No Contract / Title": stats["unsecured_loans"],
+    "% Paid Off": f"{stats['percent_paid_off']}%"
+    }   
+
     return render_template(
         "dashboard.html",
         stats=stats,
         table_rows=df.to_dict(orient="records"),
-        charts_data=charts_data  # ✅ match updated variable in HTML
+        charts_data=charts_data,
+        stats_block3=stats_block3
     )
