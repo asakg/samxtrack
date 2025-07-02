@@ -34,8 +34,8 @@ def dashboard_home():
     # Charts breakdown
     charts_data = {
         "loan_status": {
-            "Paid Off": len(df[df["Principal balance"] == 0]),
-            "Remaining": len(df[df["Principal balance"] > 0])
+            "Paid Off": len(df[df["Principal Balance"] == 0]),
+            "Remaining": len(df[df["Principal Balance"] > 0])
         },
         "risk_distribution": {
             "Critical": critical_loans,
