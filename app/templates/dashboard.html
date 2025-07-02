@@ -31,9 +31,9 @@
             margin-right: 10px;
         }
 
-        .stats-container {
+        .summary-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
             padding: 20px;
         }
@@ -52,8 +52,8 @@
         }
 
         .stat-value {
-            font-size: 24px;
-            font-weight: 600;
+            font-size: 26px;
+            font-weight: 700;
             margin-top: 5px;
         }
 
@@ -114,30 +114,30 @@
     </span>
 </nav>
 
-<div class="stats-container">
+<div class="summary-grid">
     <div class="stat-card">
         <div class="stat-title">Total Loans</div>
-        <div class="stat-value">{{ stats.total_loans }}</div>
+        <div class="stat-value">{{ summary["Total Loans"] }}</div>
     </div>
     <div class="stat-card">
         <div class="stat-title">Critical Loans</div>
-        <div class="stat-value text-danger">{{ stats.critical_loans }}</div>
+        <div class="stat-value text-danger">{{ summary["Critical Loans"] }}</div>
     </div>
     <div class="stat-card">
         <div class="stat-title">Active Borrowers</div>
-        <div class="stat-value">{{ stats.active_borrowers }}</div>
+        <div class="stat-value">{{ summary["Active Borrowers"] }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-title">Inactive Borrowers</div>
+        <div class="stat-value text-warning">{{ summary["Inactive Borrowers"] }}</div>
     </div>
     <div class="stat-card">
         <div class="stat-title">Loans w/ Title</div>
-        <div class="stat-value">{{ stats.title_loans }}</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-title">Missing Contract</div>
-        <div class="stat-value text-warning">{{ stats.missing_contract }}</div>
+        <div class="stat-value">{{ summary["Loans with Title"] }}</div>
     </div>
     <div class="stat-card">
         <div class="stat-title">With Guarantor</div>
-        <div class="stat-value">{{ stats.with_guarantor }}</div>
+        <div class="stat-value">{{ summary["With Guarantor"] }}</div>
     </div>
 </div>
 
@@ -158,18 +158,33 @@
         </tr>
         </thead>
         <tbody>
-        {% for row in table_rows %}
+        {% for row in df %}
             <tr>
-                <td>{{ row.Borrower }}</td>
-                <td>{{ row.Status }}</td>
-                <td><span class="badge {{ row.RiskColor }}">{{ row.Risk }}</span></td>
-                <td><span class="badge badge-info">{{ row.Activity }}</span></td>
-                <td>{% if row.Title == '✔' %}✔{% else %}<span class="text-danger">✖</span>{% endif %}</td>
-                <td>{% if row.Contract == '✔' %}✔{% else %}<span class="text-danger">✖</span>{% endif %}</td>
-                <td>{% if row.Guarantor == '✔' %}✔{% else %}<span class="text-danger">✖</span>{% endif %}</td>
-                <td>${{ row.Balance }}</td>
-                <td>${{ row.NextPayment }}</td>
-                <td>{{ row.PaymentDate }}</td>
+                <td>{{ row["Borrower"] }}</td>
+                <td>{{ row["Status"] }}</td>
+                <td>
+                    <span class="badge 
+                        {% if row["Weeks Behind"] >= 3 %}badge-danger
+                        {% elif row["Weeks Behind"] == 2 %}badge-warning
+                        {% elif row["Weeks Behind"] == 1 %}badge-info
+                        {% else %}badge-success
+                        {% endif %}">
+                        {% if row["Weeks Behind"] >= 3 %}Critical
+                        {% elif row["Weeks Behind"] == 2 %}At Risk
+                        {% elif row["Weeks Behind"] == 1 %}1W Behind
+                        {% else %}Paid
+                        {% endif %}
+                    </span>
+                </td>
+                <td>
+                    <span class="badge badge-info">{{ row["Group"] }}</span>
+                </td>
+                <td>{% if row["Has Title"] %}✔{% else %}<span class="text-danger">✖</span>{% endif %}</td>
+                <td>{% if row["Has Contract"] %}✔{% else %}<span class="text-danger">✖</span>{% endif %}</td>
+                <td>{% if row["Has Guarantor"] %}✔{% else %}<span class="text-danger">✖</span>{% endif %}</td>
+                <td>${{ row["Principal Balance"] }}</td>
+                <td>${{ row["Next Payment Amount"] }}</td>
+                <td>{{ row["Payment Date"] }}</td>
             </tr>
         {% endfor %}
         </tbody>
