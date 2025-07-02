@@ -1,52 +1,40 @@
-<!-- Block 3: Loan Portfolio Stats -->
-<div class="bg-white shadow rounded-xl p-6 mt-6">
-  <h2 class="text-lg font-semibold mb-4 text-gray-800">Loan Portfolio Stats</h2>
-  <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 text-sm text-gray-700">
-
-    <div class="p-4 bg-gray-50 rounded-lg">
-      <div class="font-semibold text-gray-500">Outstanding Principal</div>
-      <div class="text-xl font-bold text-gray-900">${{ stats.total_outstanding }}</div>
+<!-- block3_loan_stats.html -->
+<div class="block" id="block3">
+  <div class="card shadow-sm mb-4">
+    <div class="card-header fw-bold">Loan Portfolio Stats</div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-2">
+          <div class="stat-card bg-light border rounded text-center p-3">
+            <div class="fw-bold">Outstanding Principal</div>
+            <div class="fs-5 text-success">${{ stats_block3.outstanding_principal }}</div>
+          </div>
+        </div>
+        <div class="col-md-2">
+          <div class="stat-card bg-light border rounded text-center p-3">
+            <div class="fw-bold">Loans Past Due</div>
+            <div class="fs-5 text-danger">{{ stats_block3.loans_past_due }}</div>
+          </div>
+        </div>
+        <div class="col-md-2">
+          <div class="stat-card bg-light border rounded text-center p-3">
+            <div class="fw-bold">3+ Weeks Late</div>
+            <div class="fs-5 text-danger">{{ stats_block3.critical_late }}</div>
+          </div>
+        </div>
+        <div class="col-md-2">
+          <div class="stat-card bg-light border rounded text-center p-3">
+            <div class="fw-bold">No Contract / Title</div>
+            <div class="fs-5 text-warning">{{ stats_block3.no_contract_title }}</div>
+          </div>
+        </div>
+        <div class="col-md-2">
+          <div class="stat-card bg-light border rounded text-center p-3">
+            <div class="fw-bold">% Paid Off</div>
+            <div class="fs-5 text-primary">{{ stats_block3.paid_off_percentage }}%</div>
+          </div>
+        </div>
+      </div>
     </div>
-
-    <div class="p-4 bg-gray-50 rounded-lg">
-      <div class="font-semibold text-gray-500">Weekly Due Total</div>
-      <div class="text-xl font-bold text-gray-900">${{ stats.total_weekly_due }}</div>
-    </div>
-
-    <div class="p-4 bg-gray-50 rounded-lg">
-      <div class="font-semibold text-gray-500">Avg. Weekly Payment</div>
-      <div class="text-xl font-bold text-gray-900">${{ stats.avg_weekly_payment }}</div>
-    </div>
-
-    <div class="p-4 bg-gray-50 rounded-lg">
-      <div class="font-semibold text-gray-500">Avg. Weeks Remaining</div>
-      <div class="text-xl font-bold text-gray-900">{{ stats.avg_weeks_remaining }}</div>
-    </div>
-
-    <div class="p-4 bg-gray-50 rounded-lg">
-      <div class="font-semibold text-gray-500">Loans Past Due</div>
-      <div class="text-xl font-bold text-red-600">{{ stats.past_due_count }}</div>
-    </div>
-
-    <div class="p-4 bg-gray-50 rounded-lg">
-      <div class="font-semibold text-gray-500">3+ Weeks Late</div>
-      <div class="text-xl font-bold text-red-600">{{ stats.critical_late_count }}</div>
-    </div>
-
-    <div class="p-4 bg-gray-50 rounded-lg">
-      <div class="font-semibold text-gray-500">No Contract / Title</div>
-      <div class="text-xl font-bold text-yellow-600">{{ stats.unsecured_loans }}</div>
-    </div>
-
-    <div class="p-4 bg-gray-50 rounded-lg">
-      <div class="font-semibold text-gray-500">Drivers With Loans</div>
-      <div class="text-xl font-bold text-gray-900">{{ stats.unique_borrowers }}</div>
-    </div>
-
-    <div class="p-4 bg-gray-50 rounded-lg">
-      <div class="font-semibold text-gray-500">% Paid Off</div>
-      <div class="text-xl font-bold text-green-700">{{ stats.percent_paid_off }}%</div>
-    </div>
-
   </div>
 </div>
