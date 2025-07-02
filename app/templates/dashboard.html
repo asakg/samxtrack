@@ -31,31 +31,47 @@
             margin-right: 10px;
         }
 
-        .summary-grid {
+        .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(2, auto);
             gap: 20px;
             padding: 20px;
         }
 
-        .stat-card {
+        .dashboard-block {
             background: #ffffff;
             border-radius: 12px;
             padding: 20px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-            text-align: center;
         }
 
-        .stat-title {
+        .block-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
             font-size: 14px;
             color: #6c757d;
         }
 
-        .stat-value {
-            font-size: 26px;
-            font-weight: 700;
-            margin-top: 5px;
+        .stat-number {
+            font-size: 18px;
+            font-weight: 600;
         }
+
+        .text-red { color: #dc3545; }
+        .text-orange { color: #fd7e14; }
+        .text-blue { color: #0d6efd; }
+        .text-green { color: #198754; }
     </style>
 </head>
 <body>
@@ -66,34 +82,70 @@
     </span>
 </nav>
 
-<div class="summary-grid">
-    <div class="stat-card">
-        <div class="stat-title">Total Loans</div>
-        <div class="stat-value">{{ summary["Total Loans"] }}</div>
+<div class="dashboard-grid">
+    <!-- Block 1: Loan Stats -->
+    <div class="dashboard-block">
+        <div class="block-title">Loan Summary</div>
+        <div class="stat-row">
+            <span class="stat-label">Total Loans</span>
+            <span class="stat-number">{{ stats.total_loans }}</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Critical Loans</span>
+            <span class="stat-number text-red">{{ stats.critical_loans }}</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Active Borrowers</span>
+            <span class="stat-number text-green">{{ stats.active_borrowers }}</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Inactive Borrowers</span>
+            <span class="stat-number text-orange">{{ stats.inactive_borrowers }}</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Loans with Title</span>
+            <span class="stat-number">{{ stats.title_loans }}</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">With Guarantor</span>
+            <span class="stat-number">{{ stats.with_guarantor }}</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Missing Contract</span>
+            <span class="stat-number text-orange">{{ stats.missing_contract }}</span>
+        </div>
     </div>
-    <div class="stat-card">
-        <div class="stat-title">Critical Loans</div>
-        <div class="stat-value text-danger">{{ summary["Critical Loans"] }}</div>
+
+    <!-- Block 2 -->
+    <div class="dashboard-block">
+        <div class="block-title">Block 2</div>
+        <p class="text-muted">(coming soon)</p>
     </div>
-    <div class="stat-card">
-        <div class="stat-title">Active Borrowers</div>
-        <div class="stat-value">{{ summary["Active Borrowers"] }}</div>
+
+    <!-- Block 3 -->
+    <div class="dashboard-block">
+        <div class="block-title">Block 3</div>
+        <p class="text-muted">(coming soon)</p>
     </div>
-    <div class="stat-card">
-        <div class="stat-title">Inactive Borrowers</div>
-        <div class="stat-value text-warning">{{ summary["Inactive Borrowers"] }}</div>
+
+    <!-- Block 4 -->
+    <div class="dashboard-block">
+        <div class="block-title">Block 4</div>
+        <p class="text-muted">(coming soon)</p>
     </div>
-    <div class="stat-card">
-        <div class="stat-title">Loans w/ Title</div>
-        <div class="stat-value">{{ summary["Loans with Title"] }}</div>
+
+    <!-- Block 5 -->
+    <div class="dashboard-block">
+        <div class="block-title">Block 5</div>
+        <p class="text-muted">(coming soon)</p>
     </div>
-    <div class="stat-card">
-        <div class="stat-title">With Guarantor</div>
-        <div class="stat-value">{{ summary["With Guarantor"] }}</div>
+
+    <!-- Block 6 -->
+    <div class="dashboard-block">
+        <div class="block-title">Block 6</div>
+        <p class="text-muted">(coming soon)</p>
     </div>
 </div>
-
-<!-- Future dashboard blocks (2 to 6) go here -->
 
 </body>
 </html>
