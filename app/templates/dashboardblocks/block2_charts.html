@@ -1,122 +1,68 @@
+<div class="col-md-12">
+    <div class="card shadow-sm h-100">
+        <div class="card-header fw-bold">Loan Health Charts</div>
+        <div class="card-body">
+            <div class="row g-4">
+
+                <div class="col-md-4">
+                    <canvas id="loanStatusChart" height="200"></canvas>
+                </div>
+                <div class="col-md-4">
+                    <canvas id="riskDistributionChart" height="200"></canvas>
+                </div>
+                <div class="col-md-4">
+                    <canvas id="borrowerActivityChart" height="200"></canvas>
+                </div>
+
+                <div class="col-md-6">
+                    <canvas id="paymentStatusChart" height="200"></canvas>
+                </div>
+                <div class="col-md-6">
+                    <canvas id="titleStatusChart" height="200"></canvas>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<div class="row g-4 mt-2">
-  <!-- Chart 1: Loan Status -->
-  <div class="col-md-4">
-    <div class="card shadow-sm">
-      <div class="card-header fw-bold">Loan Status</div>
-      <div class="card-body">
-        <canvas id="loanStatusChart" height="200"></canvas>
-      </div>
-    </div>
-  </div>
-
-  <!-- Chart 2: Risk Distribution -->
-  <div class="col-md-4">
-    <div class="card shadow-sm">
-      <div class="card-header fw-bold">Risk Distribution</div>
-      <div class="card-body">
-        <canvas id="riskChart" height="200"></canvas>
-      </div>
-    </div>
-  </div>
-
-  <!-- Chart 3: Borrower Activity -->
-  <div class="col-md-4">
-    <div class="card shadow-sm">
-      <div class="card-header fw-bold">Borrower Activity</div>
-      <div class="card-body">
-        <canvas id="borrowerActivityChart" height="200"></canvas>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- More charts -->
-<div class="row g-4 mt-2">
-  <!-- Chart 4: Payment Status -->
-  <div class="col-md-6">
-    <div class="card shadow-sm">
-      <div class="card-header fw-bold">Payment Status</div>
-      <div class="card-body">
-        <canvas id="paymentStatusChart" height="200"></canvas>
-      </div>
-    </div>
-  </div>
-
-  <!-- Chart 5: Collateral -->
-  <div class="col-md-6">
-    <div class="card shadow-sm">
-      <div class="card-header fw-bold">Title Status</div>
-      <div class="card-body">
-        <canvas id="collateralChart" height="200"></canvas>
-      </div>
-    </div>
-  </div>
-</div>
-
 <script>
-  // Pass chart data safely
-  const chartsData = JSON.parse('{{ charts_data | tojson | safe }}');
+    const chartsData = JSON.parse('{{ charts_data | tojson | safe }}');
+    
+    function createDoughnutChart(ctxId, dataObj, colors) {
+        const total = Object.values(dataObj).reduce((a, b) => a + b, 0);
+        const labels = Object.entries(dataObj).map(
+            ([key, value]) => `${key} (${((value / total) * 100).toFixed(1)}%)`
+        );
+        const values = Object.values(dataObj);
 
-  // Chart 1: Loan Status
-  new Chart(document.getElementById("loanStatusChart"), {
-    type: "doughnut",
-    data: {
-      labels: Object.keys(chartsData.loan_status),
-      datasets: [{
-        data: Object.values(chartsData.loan_status),
-        backgroundColor: ["#10b981", "#f59e0b"]
-      }]
+        new Chart(document.getElementById(ctxId), {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: colors
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    }
+                }
+            }
+        });
     }
-  });
 
-  // Chart 2: Risk Distribution
-  new Chart(document.getElementById("riskChart"), {
-    type: "doughnut",
-    data: {
-      labels: Object.keys(chartsData.risk_distribution),
-      datasets: [{
-        data: Object.values(chartsData.risk_distribution),
-        backgroundColor: ["#ef4444", "#3a3e63"]
-      }]
-    }
-  });
-
-  // Chart 3: Borrower Activity
-  new Chart(document.getElementById("borrowerActivityChart"), {
-    type: "doughnut",
-    data: {
-      labels: Object.keys(chartsData.borrower_activity),
-      datasets: [{
-        data: Object.values(chartsData.borrower_activity),
-        backgroundColor: ["#3b82f6", "#d1d5db"]
-      }]
-    }
-  });
-
-  // Chart 4: Payment Status
-  new Chart(document.getElementById("paymentStatusChart"), {
-    type: "doughnut",
-    data: {
-      labels: Object.keys(chartsData.payment_status),
-      datasets: [{
-        data: Object.values(chartsData.payment_status),
-        backgroundColor: ["#6366f1", "#facc15", "#f87171", "#34d399", "#9ca3af"]
-      }]
-    }
-  });
-
-  // Chart 5: Collateral (Title)
-  new Chart(document.getElementById("collateralChart"), {
-    type: "doughnut",
-    data: {
-      labels: Object.keys(chartsData.collateral),
-      datasets: [{
-        data: Object.values(chartsData.collateral),
-        backgroundColor: ["#0ea5e9", "#f43f5e"]
-      }]
-    }
-  });
+    // Create each chart
+    createDoughnutChart('loanStatusChart', chartsData.loan_status, ['#10b981', '#f59e0b']);
+    createDoughnutChart('riskDistributionChart', chartsData.risk_distribution, ['#ef4444', '#3e3e63']);
+    createDoughnutChart('borrowerActivityChart', chartsData.borrower_activity, ['#3b82f6', '#d1d5db']);
+    createDoughnutChart('paymentStatusChart', chartsData.payment_status, ['#6366f1', '#facc15', '#f43f5e', '#34d399', '#a855f7', '#3b82f6']);
+    createDoughnutChart('titleStatusChart', chartsData.collateral, ['#0ea5e9', '#f43f5e']);
 </script>
