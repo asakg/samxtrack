@@ -19,6 +19,9 @@ def dashboard_home():
     no_contract = len(df[df["Has Contract"] == False])
     with_guarantor = len(df[df["Has Guarantor"]])
 
+    # ✅ New: Loans with neither title nor guarantor (high risk)
+    no_title_guarantor = len(df[(df["Has Title"] == False) & (df["Has Guarantor"] == False)])
+
     stats = {
         "total_loans": total_loans,
         "critical_loans": critical_loans,
@@ -26,11 +29,12 @@ def dashboard_home():
         "inactive_borrowers": inactive_borrowers,
         "title_loans": with_title,
         "missing_contract": no_contract,
-        "with_guarantor": with_guarantor
+        "with_guarantor": with_guarantor,
+        "no_title_guarantor": no_title_guarantor  # ✅ Added to template context
     }
 
     return render_template(
         "dashboard.html",
-        stats=stats,  # ✅ Pass stats
+        stats=stats,
         table_rows=df.to_dict(orient="records")
     )
