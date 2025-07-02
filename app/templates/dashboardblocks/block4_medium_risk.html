@@ -16,14 +16,14 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for row in table_rows if row['Risk Status'] == "Medium" %}
+                        {% for row in medium_risk_rows %}
                         <tr>
-                            <td>{{ row['Borrower'] }}</td>
-                            <td><span class="badge bg-warning text-dark">{{ row['Status'] }}</span></td>
-                            <td>${{ "{:,}".format(row['Principal Balance']) }}</td>
+                            <td>{{ row["Borrower"] }}</td>
+                            <td><span class="badge bg-warning text-dark">{{ row["Status"] }}</span></td>
+                            <td>${{ "{:,}".format(row["Principal Balance"]) }}</td>
                             <td>
-                                {% if row['Contract'] != '✔' %}<span class="badge bg-danger">No Contract</span> {% endif %}
-                                {% if row['Title Ownership'] != '✔' %}<span class="badge bg-danger">No Title</span> {% endif %}
+                                {% if row["Contract"] != '✔' %}<span class="badge bg-danger">No Contract</span> {% endif %}
+                                {% if row["Title Ownership"] != '✔' %}<span class="badge bg-danger">No Title</span> {% endif %}
                             </td>
                             <td>
                                 <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#loanModal{{ loop.index }}">Details</button>
@@ -35,19 +35,19 @@
                             <div class="modal-dialog modal-dialog-centered">
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <h5 class="modal-title">Loan Details - {{ row['Borrower'] }}</h5>
+                                        <h5 class="modal-title">Loan Details - {{ row["Borrower"] }}</h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">
                                         <ul class="list-group">
-                                            <li class="list-group-item"><strong>Status:</strong> {{ row['Status'] }}</li>
-                                            <li class="list-group-item"><strong>Balance:</strong> ${{ "{:,}".format(row['Principal Balance']) }}</li>
-                                            <li class="list-group-item"><strong>Last Week Collected:</strong> {{ row['Last W Collected'] }}</li>
-                                            <li class="list-group-item"><strong>Title:</strong> {{ row['Title Ownership'] }}</li>
-                                            <li class="list-group-item"><strong>Contract:</strong> {{ row['Contract'] }}</li>
-                                            <li class="list-group-item"><strong>Guarantor:</strong> {{ row['Guarantor'] }}</li>
-                                            <li class="list-group-item"><strong>Next Payment:</strong> ${{ row['Next Payment Amount'] }}</li>
-                                            <li class="list-group-item"><strong>Payment Date:</strong> {{ row['Payment Date'] }}</li>
+                                            <li class="list-group-item"><strong>Status:</strong> {{ row["Status"] }}</li>
+                                            <li class="list-group-item"><strong>Balance:</strong> ${{ "{:,}".format(row["Principal Balance"]) }}</li>
+                                            <li class="list-group-item"><strong>Last Week Collected:</strong> {{ row["Last W Collected"] }}</li>
+                                            <li class="list-group-item"><strong>Title:</strong> {{ row["Title Ownership"] }}</li>
+                                            <li class="list-group-item"><strong>Contract:</strong> {{ row["Contract"] }}</li>
+                                            <li class="list-group-item"><strong>Guarantor:</strong> {{ row["Guarantor"] }}</li>
+                                            <li class="list-group-item"><strong>Next Payment:</strong> ${{ row["Next Payment Amount"] }}</li>
+                                            <li class="list-group-item"><strong>Payment Date:</strong> {{ row["Payment Date"] }}</li>
                                         </ul>
                                     </div>
                                 </div>
