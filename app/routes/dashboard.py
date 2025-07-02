@@ -9,21 +9,18 @@ def dashboard_home():
         return redirect(url_for("login.login"))
 
     df = load_latest_loans()
-    
-    # Example summary counts (you can send to template)
-    total_loans = len(df)
-    critical_loans = len(df[df["Risk Level"] == "Critical"])
-    active_borrowers = len(df[df["Activity Status"] == "Active"])
-    with_title = len(df[df["Has Title"]])
-    no_contract = len(df[df["Has Contract"] == False])
-    with_guarantor = len(df[df["Has Guarantor"]])
 
-    return render_template("dashboard.html", 
-        df=df.to_dict(orient="records"),
-        total_loans=total_loans,
-        critical_loans=critical_loans,
-        active_borrowers=active_borrowers,
-        with_title=with_title,
-        no_contract=no_contract,
-        with_guarantor=with_guarantor
-    )
+    # Build summary stats for top cards
+    stats = {
+        "total_loans": len(df),
+        "critical_loans": len(df[df["Risk Level"] == "Critical"]),
+        "active_borrowers": len(df[df["Activity Status"] == "Active"]),
+        "with_title": len(df[df["Has Title"] == True]),
+        "no_contract": len(df[df["Has Contract"] == False]),
+        "with_guarantor": len(df[df["Has Guarantor"] == True])
+    }
+
+    # Convert DataFrame to dict for rendering in HTML
+    table_rows = df.to_dict(orient="records")
+
+    return render_template("dashboard.html", stats=stats, table_rows=table_rows)
