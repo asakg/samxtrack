@@ -70,12 +70,14 @@ def dashboard_home():
     "3+ Weeks Late": stats["critical_late_count"],
     "No Contract / Title": stats["unsecured_loans"],
     "% Paid Off": f"{stats['percent_paid_off']}%"
-    }   
+    }
+    medium_risk_df = df[df["Risk Level"] == "Medium"]
 
     return render_template(
         "dashboard.html",
         stats=stats,
         table_rows=df.to_dict(orient="records"),
         charts_data=charts_data,
-        stats_block3=stats_block3
+        stats_block3=stats_block3,
+        medium_risk_rows=medium_risk_df.to_dict(orient="records")
     )
