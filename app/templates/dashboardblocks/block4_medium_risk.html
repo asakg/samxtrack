@@ -37,7 +37,8 @@
     let showingAll = false;
 
     // Filter out rows with "Finished" status
-    const filteredRows = fullRows.filter(row => row.Status !== "Finished");
+    const filteredRows = fullRows.filter(row =>
+    !(row.Status === "Finished" && parseFloat(row["Principal Balance"]) === 0));
 
     function renderRow(row, index) {
         const balance = parseFloat(row["Principal Balance"] || 0).toLocaleString();
