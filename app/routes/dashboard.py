@@ -18,8 +18,6 @@ def dashboard_home():
     with_title = len(df[df["Has Title"]])
     no_contract = len(df[df["Has Contract"] == False])
     with_guarantor = len(df[df["Has Guarantor"]])
-
-    # ✅ New: Loans with neither title nor guarantor (high risk)
     no_title_guarantor = len(df[(df["Has Title"] == False) & (df["Has Guarantor"] == False)])
 
     stats = {
@@ -30,11 +28,33 @@ def dashboard_home():
         "title_loans": with_title,
         "missing_contract": no_contract,
         "with_guarantor": with_guarantor,
-        "no_title_guarantor": no_title_guarantor  # ✅ Added to template context
+        "no_title_guarantor": no_title_guarantor
+    }
+
+    # Charts breakdown
+    charts_data = {
+        "loan_status": {
+            "Paid Off": len(df[df["Principal balance"] == 0]),
+            "Remaining": len(df[df["Principal balance"] > 0])
+        },
+        "risk_distribution": {
+            "Critical": critical_loans,
+            "Non-Critical": total_loans - critical_loans
+        },
+        "borrower_activity": {
+            "Active": active_borrowers,
+            "Inactive": inactive_borrowers
+        },
+        "payment_status": df["Status"].value_counts().to_dict(),
+        "collateral": {
+            "Has Title": with_title,
+            "No Title": total_loans - with_title
+        }
     }
 
     return render_template(
         "dashboard.html",
         stats=stats,
-        table_rows=df.to_dict(orient="records")
+        table_rows=df.to_dict(orient="records"),
+        charts_data=charts_data  # ✅ match updated variable in HTML
     )
