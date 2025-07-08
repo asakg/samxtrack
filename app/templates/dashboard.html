@@ -2,63 +2,73 @@
 
 {% block content %}
 <div class="container-fluid mt-4">
-    <div class="row">
-        <div class="col-md-10">
-            <div class="container-fluid">
-                <div class="row mb-4">
-                    <div class="col">
-                        <div class="card shadow-sm">
-                            <div class="card-body">
-                                <h4 class="fw-bold mb-3">Loan Summary</h4>
-                                <div class="row text-center">
-                                    <div class="col-md-2"><p class="mb-1">Total Loans</p><h5>{{ stats.total_loans }}</h5></div>
-                                    <div class="col-md-2"><p class="mb-1">Active Borrowers</p><h5 class="text-primary">{{ stats.active_borrowers }}</h5></div>
-                                    <div class="col-md-2"><p class="mb-1">Inactive Borrowers</p><h5 class="text-warning">{{ stats.inactive_borrowers }}</h5></div>
-                                    <div class="col-md-2"><p class="mb-1">Critical Loans</p><h5 class="text-danger">{{ stats.critical_loans }}</h5></div>
-                                    <div class="col-md-2"><p class="mb-1">Missing Contract</p><h5 class="text-warning">{{ stats.missing_contract }}</h5></div>
-                                    <div class="col-md-2"><p class="mb-1">Loans w/ Title</p><h5 class="text-success">{{ stats.title_loans }}</h5></div>
-                                    <div class="col-md-2 mt-3"><p class="mb-1">With Guarantor</p><h5 class="text-success">{{ stats.with_guarantor }}</h5></div>
-                                    <div class="col-md-2 mt-3"><p class="mb-1">No Title & No Guarantor</p><h5>{{ stats.no_title_guarantor }}</h5></div>
-                                </div>
-                            </div>
+    <!-- Loan Portfolio Stats FIRST -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h4 class="fw-bold mb-3">Loan Portfolio Stats</h4>
+                    <div class="row text-center">
+                        <div class="col-md-2">
+                            <p class="text-muted small">Outstanding Principal</p>
+                            <h5 class="text-primary">{{ stats_block3["Outstanding Principal"] }}</h5>
+                            <canvas id="principalChart" height="100"></canvas>
+                        </div>
+                        <div class="col-md-2">
+                            <p class="text-muted small">Loans Past Due</p>
+                            <h5 class="text-danger">{{ stats_block3["Loans Past Due"] }}</h5>
+                        </div>
+                        <div class="col-md-2">
+                            <p class="text-muted small">3+ Weeks Late</p>
+                            <h5 class="text-danger">{{ stats_block3["3+ Weeks Late"] }}</h5>
+                        </div>
+                        <div class="col-md-2">
+                            <p class="text-muted small">No Contract / Title</p>
+                            <h5 class="text-danger">{{ stats_block3["No Contract / Title"] }}</h5>
+                        </div>
+                        <div class="col-md-2">
+                            <p class="text-muted small">% Paid Off</p>
+                            <h5 class="text-success">{{ stats_block3["% Paid Off"] }}</h5>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
 
-                <!-- Loan Health Charts -->
-                <div class="row mb-4">
-                    <div class="col">
-                        <div class="card shadow-sm">
-                            <div class="card-body">
-                                <h4 class="fw-bold mb-3">Loan Health Charts</h4>
-                                <div class="row text-center">
-                                    {% for chart, data in charts_data.items() %}
-                                    <div class="col-md-2 mb-4">
-                                        <canvas id="{{ chart }}Chart" width="100" height="100"></canvas>
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                            </div>
-                        </div>
+    <!-- Loan Summary -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h4 class="fw-bold mb-3">Loan Summary</h4>
+                    <div class="row text-center">
+                        <div class="col-md-2"><p class="mb-1">Total Loans</p><h5>{{ stats.total_loans }}</h5></div>
+                        <div class="col-md-2"><p class="mb-1">Active Borrowers</p><h5 class="text-primary">{{ stats.active_borrowers }}</h5></div>
+                        <div class="col-md-2"><p class="mb-1">Inactive Borrowers</p><h5 class="text-warning">{{ stats.inactive_borrowers }}</h5></div>
+                        <div class="col-md-2"><p class="mb-1">Critical Loans</p><h5 class="text-danger">{{ stats.critical_loans }}</h5></div>
+                        <div class="col-md-2"><p class="mb-1">Missing Contract</p><h5 class="text-warning">{{ stats.missing_contract }}</h5></div>
+                        <div class="col-md-2"><p class="mb-1">Loans w/ Title</p><h5 class="text-success">{{ stats.title_loans }}</h5></div>
+                        <div class="col-md-2 mt-3"><p class="mb-1">With Guarantor</p><h5 class="text-success">{{ stats.with_guarantor }}</h5></div>
+                        <div class="col-md-2 mt-3"><p class="mb-1">No Title & No Guarantor</p><h5>{{ stats.no_title_guarantor }}</h5></div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
 
-                <!-- Loan Portfolio Stats -->
-                <div class="row mb-4">
-                    <div class="col">
-                        <div class="card shadow-sm">
-                            <div class="card-body">
-                                <h4 class="fw-bold mb-3">Loan Portfolio Stats</h4>
-                                <div class="row text-center">
-                                    {% for label, value in stats_block3.items() %}
-                                    <div class="col-md-2">
-                                        <p class="text-muted small">{{ label }}</p>
-                                        <h5 class="text-primary">{{ value }}</h5>
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                            </div>
+    <!-- Loan Health Charts -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h4 class="fw-bold mb-3">Loan Health Charts</h4>
+                    <div class="row text-center">
+                        {% for chart, data in charts_data.items() %}
+                        <div class="col-md-2">
+                            <canvas id="{{ chart }}Chart"></canvas>
                         </div>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
@@ -66,11 +76,9 @@
     </div>
 </div>
 
-<!-- Chart.js -->
+<!-- Include Chart.js and Render Charts -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script id="chart-data" type="application/json">
-    {{ charts_data | tojson | safe }}
-</script>
+<script type="application/json" id="chart-data">{{ charts_data | tojson | safe }}</script>
 <script>
     const charts = JSON.parse(document.getElementById("chart-data").textContent);
 
@@ -81,28 +89,15 @@
             data: {
                 labels: Object.keys(data),
                 datasets: [{
-                    label: "Distribution",
                     data: Object.values(data),
-                    backgroundColor: [
-                        "#4CAF50", "#FFC107", "#2196F3", "#F44336", "#9C27B0", "#FF5722"
-                    ],
-                    borderWidth: 1
+                    backgroundColor: ["#4CAF50", "#FFC107", "#2196F3", "#F44336", "#9C27B0", "#FF5722"]
                 }]
             },
             options: {
-                cutout: "60%",
+                responsive: true,
                 plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.label || "";
-                                let value = context.raw || 0;
-                                return `${label}: ${value}`;
-                            }
-                        }
-                    },
                     legend: {
-                        position: "bottom"
+                        position: 'bottom'
                     }
                 }
             }
@@ -112,5 +107,25 @@
     for (const chart in charts) {
         drawDonutChart(chart + "Chart", charts[chart]);
     }
+
+    // Draw chart for outstanding principal
+    const principalCtx = document.getElementById("principalChart").getContext("2d");
+    new Chart(principalCtx, {
+        type: "doughnut",
+        data: {
+            labels: ["Paid Off", "Outstanding"],
+            datasets: [{
+                data: [parseFloat("{{ stats_block3['% Paid Off']|replace('%','') }}"), 100 - parseFloat("{{ stats_block3['% Paid Off']|replace('%','') }}")],
+                backgroundColor: ["#4CAF50", "#F44336"]
+            }]
+        },
+        options: {
+            responsive: true,
+            cutout: '70%',
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
 </script>
 {% endblock %}
