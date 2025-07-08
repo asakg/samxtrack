@@ -1,15 +1,88 @@
 {% extends "base.html" %}
+
 {% block content %}
 <div class="container-fluid mt-4">
-    <div class="row g-4">
-        {% include "dashboardblocks/block1_loan_summary.html" %}
-        {% include "dashboardblocks/block2_charts.html" %}
-        {% include "dashboardblocks/block3_stats.html" %}
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h4 class="fw-bold mb-3">Loan Summary</h4>
+                    <div class="row text-center">
+                        <div class="col-md-2"><p class="mb-1">Total Loans</p><h5>{{ stats.total_loans }}</h5></div>
+                        <div class="col-md-2"><p class="mb-1">Active Borrowers</p><h5 class="text-primary">{{ stats.active_borrowers }}</h5></div>
+                        <div class="col-md-2"><p class="mb-1">Inactive Borrowers</p><h5 class="text-warning">{{ stats.inactive_borrowers }}</h5></div>
+                        <div class="col-md-2"><p class="mb-1">Critical Loans</p><h5 class="text-danger">{{ stats.critical_loans }}</h5></div>
+                        <div class="col-md-2"><p class="mb-1">Missing Contract</p><h5 class="text-warning">{{ stats.missing_contract }}</h5></div>
+                        <div class="col-md-2"><p class="mb-1">Loans w/ Title</p><h5 class="text-success">{{ stats.title_loans }}</h5></div>
+                        <div class="col-md-2 mt-3"><p class="mb-1">With Guarantor</p><h5 class="text-success">{{ stats.with_guarantor }}</h5></div>
+                        <div class="col-md-2 mt-3"><p class="mb-1">No Title & No Guarantor</p><h5>{{ stats.no_title_guarantor }}</h5></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="row g-4 mt-2">
-        {% include "dashboardblocks/block4_medium_risk.html" %}
-        {% include "dashboardblocks/block5_high_risk.html" %}
-        {% include "dashboardblocks/block6_take_action.html" %}
+
+    <!-- Loan Health Charts -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h4 class="fw-bold mb-3">Loan Health Charts</h4>
+                    <div class="row text-center">
+                        {% for chart, data in charts_data.items() %}
+                        <div class="col-md-2">
+                            <canvas id="{{ chart }}Chart"></canvas>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loan Portfolio Stats -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h4 class="fw-bold mb-3">Loan Portfolio Stats</h4>
+                    <div class="row text-center">
+                        {% for label, value in stats_block3.items() %}
+                        <div class="col-md-2">
+                            <p class="text-muted small">{{ label }}</p>
+                            <h5 class="text-primary">{{ value }}</h5>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
+<!-- Include Chart.js and Render Charts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const charts = JSON.parse(document.getElementById("chart-data").textContent);
+
+    function drawPieChart(id, data) {
+        const ctx = document.getElementById(id).getContext("2d");
+        new Chart(ctx, {
+            type: "pie",
+            data: {
+                labels: Object.keys(data),
+                datasets: [{
+                    data: Object.values(data),
+                    backgroundColor: [
+                        "#4CAF50", "#FFC107", "#2196F3", "#F44336", "#9C27B0", "#FF5722"
+                    ]
+                }]
+            }
+        });
+    }
+
+    for (const chart in charts) {
+        drawPieChart(chart, charts[chart]);
+    }
+</script>
 {% endblock %}
