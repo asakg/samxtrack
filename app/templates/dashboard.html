@@ -2,35 +2,13 @@
 
 {% block content %}
 <div class="container-fluid mt-4">
-    <!-- Loan Portfolio Stats FIRST -->
+    <!-- Loan Portfolio Stats with Speedometer First -->
     <div class="row mb-4">
         <div class="col">
             <div class="card shadow-sm">
-                <div class="card-body">
-                    <h4 class="fw-bold mb-3">Loan Portfolio Stats</h4>
-                    <div class="row text-center">
-                        <div class="col-md-2">
-                            <p class="text-muted small">Outstanding Principal</p>
-                            <h5 class="text-primary">{{ stats_block3["Outstanding Principal"] }}</h5>
-                            <canvas id="principalChart" height="100"></canvas>
-                        </div>
-                        <div class="col-md-2">
-                            <p class="text-muted small">Loans Past Due</p>
-                            <h5 class="text-danger">{{ stats_block3["Loans Past Due"] }}</h5>
-                        </div>
-                        <div class="col-md-2">
-                            <p class="text-muted small">3+ Weeks Late</p>
-                            <h5 class="text-danger">{{ stats_block3["3+ Weeks Late"] }}</h5>
-                        </div>
-                        <div class="col-md-2">
-                            <p class="text-muted small">No Contract / Title</p>
-                            <h5 class="text-danger">{{ stats_block3["No Contract / Title"] }}</h5>
-                        </div>
-                        <div class="col-md-2">
-                            <p class="text-muted small">% Paid Off</p>
-                            <h5 class="text-success">{{ stats_block3["% Paid Off"] }}</h5>
-                        </div>
-                    </div>
+                <div class="card-body text-center">
+                    <h4 class="fw-bold mb-3">Loan Portfolio Overview</h4>
+                    <canvas id="loanSpeedometer" width="300" height="200"></canvas>
                 </div>
             </div>
         </div>
@@ -76,13 +54,17 @@
     </div>
 </div>
 
+<!-- Embed charts data and stats data safely -->
+<script id="chart-data" type="application/json">{{ charts_data | tojson | safe }}</script>
+<script id="stats-data" type="application/json">{{ stats | tojson | safe }}</script>
+
 <!-- Include Chart.js and Render Charts -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script type="application/json" id="chart-data">{{ charts_data | tojson | safe }}</script>
 <script>
     const charts = JSON.parse(document.getElementById("chart-data").textContent);
+    const stats = JSON.parse(document.getElementById("stats-data").textContent);
 
-    function drawDonutChart(id, data) {
+    function drawPieChart(id, data) {
         const ctx = document.getElementById(id).getContext("2d");
         new Chart(ctx, {
             type: "doughnut",
@@ -94,36 +76,46 @@
                 }]
             },
             options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
-                    }
-                }
+                cutout: "70%",
+                plugins: { legend: { position: 'bottom' } }
             }
         });
     }
 
     for (const chart in charts) {
-        drawDonutChart(chart + "Chart", charts[chart]);
+        drawPieChart(chart + "Chart", charts[chart]);
     }
 
-    // Draw chart for outstanding principal
-    const principalCtx = document.getElementById("principalChart").getContext("2d");
-    new Chart(principalCtx, {
-        type: "doughnut",
+    // Speedometer
+    const total = stats.total_loans;
+    const paid = stats.paid_off;
+    const past_due = stats.loans_past_due;
+    const good = total - paid - past_due;
+
+    const ctxSpeed = document.getElementById("loanSpeedometer").getContext("2d");
+    new Chart(ctxSpeed, {
+        type: 'doughnut',
         data: {
-            labels: ["Paid Off", "Outstanding"],
+            labels: ['Past Due', 'In Good Standing', 'Paid Off'],
             datasets: [{
-                data: [parseFloat("{{ stats_block3['% Paid Off']|replace('%','') }}"), 100 - parseFloat("{{ stats_block3['% Paid Off']|replace('%','') }}")],
-                backgroundColor: ["#4CAF50", "#F44336"]
+                data: [past_due, good, paid],
+                backgroundColor: ['#F44336', '#FFC107', '#4CAF50']
             }]
         },
         options: {
-            responsive: true,
-            cutout: '70%',
+            cutout: '80%',
             plugins: {
-                legend: { position: 'bottom' }
+                legend: {
+                    display: true,
+                    position: 'bottom'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function (ctx) {
+                            return `${ctx.label}: ${ctx.raw}`;
+                        }
+                    }
+                }
             }
         }
     });
