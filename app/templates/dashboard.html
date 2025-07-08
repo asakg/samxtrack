@@ -94,30 +94,33 @@
 
     const ctxSpeed = document.getElementById("loanSpeedometer").getContext("2d");
     new Chart(ctxSpeed, {
-        type: 'doughnut',
-        data: {
-            labels: ['Past Due', 'In Good Standing', 'Paid Off'],
-            datasets: [{
-                data: [past_due, good, paid],
-                backgroundColor: ['#F44336', '#FFC107', '#4CAF50']
-            }]
-        },
-        options: {
-            cutout: '80%',
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'bottom'
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function (ctx) {
-                            return `${ctx.label}: ${ctx.raw}`;
-                        }
+    type: 'doughnut',
+    data: {
+        labels: ['Past Due', 'In Good Standing', 'Paid Off'],
+        datasets: [{
+            data: [past_due, good, paid],
+            backgroundColor: ['#F44336', '#FFC107', '#4CAF50'],
+            borderWidth: 0
+        }]
+    },
+    options: {
+        rotation: -90,
+        circumference: 180,
+        cutout: '70%',
+        plugins: {
+            legend: {
+                display: true,
+                position: 'bottom'
+            },
+            tooltip: {
+                callbacks: {
+                    label: function (ctx) {
+                        return `${ctx.label}: ${ctx.raw}`;
                     }
                 }
             }
         }
-    });
+    }
+});
 </script>
 {% endblock %}
