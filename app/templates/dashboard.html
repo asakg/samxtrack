@@ -1,14 +1,14 @@
 {% extends "base.html" %}
-
 {% block content %}
 <div class="container-fluid mt-4">
-    <!-- Loan Portfolio Stats with Speedometer First -->
+
+    <!-- Loan Portfolio Speedometer -->
     <div class="row mb-4">
-        <div class="col">
+        <div class="col text-center">
             <div class="card shadow-sm">
-                <div class="card-body text-center">
+                <div class="card-body">
                     <h4 class="fw-bold mb-3">Loan Portfolio Overview</h4>
-                    <canvas id="loanSpeedometer" width="300" height="200"></canvas>
+                    <canvas id="loanSpeedometer" width="400" height="200"></canvas>
                 </div>
             </div>
         </div>
@@ -54,20 +54,23 @@
     </div>
 </div>
 
-<!-- Inject charts and stats data safely -->
+<!-- Embedded chart data -->
 <script id="chart-data" type="application/json">
     {{ charts_data | tojson | safe }}
 </script>
+
+<!-- Embedded stats data (✅ new) -->
 <script id="stats-data" type="application/json">
     {{ stats | tojson | safe }}
 </script>
 
-<!-- Include Chart.js -->
+<!-- Chart.js and plugin -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.1.0/dist/chartjs-plugin-annotation.min.js"></script>
 
 <script>
     const charts = JSON.parse(document.getElementById("chart-data").textContent);
-    const statsData = JSON.parse(document.getElementById("stats-data").textContent);
+    const stats = JSON.parse(document.getElementById("stats-data").textContent);
 
     function drawPieChart(id, data) {
         const ctx = document.getElementById(id).getContext("2d");
@@ -91,20 +94,29 @@
         drawPieChart(chart + "Chart", charts[chart]);
     }
 
-    // Speedometer
-    const total = statsData.total_loans;
-    const paid = statsData.paid_off;
-    const pastDue = statsData.past_due_count;
+    // Speedometer Data
+    const total = stats.total_loans;
+    const paid = stats.paid_off;
+    const pastDue = stats.loans_past_due;
     const good = total - paid - pastDue;
+
+    const paidPct = (paid / total * 100).toFixed(1);
+    const pastPct = (pastDue / total * 100).toFixed(1);
+    const goodPct = (good / total * 100).toFixed(1);
 
     const ctx = document.getElementById("loanSpeedometer").getContext("2d");
     new Chart(ctx, {
         type: 'doughnut',
         data: {
-            labels: ['Past Due', 'In Good Standing', 'Paid Off'],
+            labels: [
+                `Past Due (${pastPct}%)`,
+                `In Good Standing (${goodPct}%)`,
+                `Paid Off (${paidPct}%)`
+            ],
             datasets: [{
                 data: [pastDue, good, paid],
-                backgroundColor: ['#F44336', '#FFC107', '#4CAF50']
+                backgroundColor: ['#F44336', '#FFC107', '#4CAF50'],
+                borderWidth: 0
             }]
         },
         options: {
@@ -112,10 +124,30 @@
             circumference: 180,
             cutout: '70%',
             plugins: {
-                legend: { position: 'bottom' }
-            },
-            tooltips: {
-                enabled: true
+                legend: {
+                    display: true,
+                    position: 'bottom',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => `${ctx.label}`
+                    }
+                },
+                annotation: {
+                    annotations: {
+                        pointer: {
+                            type: 'line',
+                            xMin: 0,
+                            xMax: 200,
+                            yMin: 100,
+                            yMax: 0,
+                            borderColor: '#000',
+                            borderWidth: 2,
+                            borderDash: [2, 2],
+                            scaleID: 'x-axis-0'
+                        }
+                    }
+                }
             }
         }
     });
