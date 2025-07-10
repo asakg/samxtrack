@@ -8,7 +8,7 @@
       <div class="card shadow-sm">
         <div class="card-body">
           <h4 class="fw-bold mb-3">Loan Portfolio Overview</h4>
-          <div style="max-width: 400px; margin: 0 auto;">
+          <div style="max-width: 320px; margin: 0 auto;">
             <canvas id="loanSpeedometer" width="400" height="200"></canvas>
           </div>
         </div>
@@ -166,16 +166,18 @@
         },
         annotation: {
           annotations: {
-            pointer: {
+            needle: {
               type: 'line',
               xMin: 0,
-              xMax: 0,
+              xMax: Math.cos((Math.PI * ((pastDue + good) / total)) - Math.PI),
               yMin: 0,
-              yMax: 100,
-              borderColor: '#000',
-              borderWidth: 2,
-              rotation: (pastDue + good) / total * 180 - 90,
-              display: true
+              yMax: Math.sin((Math.PI * ((pastDue + good) / total)) - Math.PI),
+              borderColor: 'black',
+              borderWidth: 3,
+              borderDash: [2, 2],
+              label: {
+                display: false
+              }
             }
           }
         }
