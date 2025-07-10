@@ -90,22 +90,8 @@
     {{ stats | tojson | safe }}
 </script>
 
-<!-- Chart.js Core -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-
-<!-- Gauge Plugin -->
-<script src="https://cdn.jsdelivr.net/npm/chartjs-gauge@0.4.0"></script>
-
-<!-- Manual registration -->
-<script>
-  // Register the gauge controller for Chart.js v4
-  Chart.register(
-    window['chartjs-gauge'].GaugeController,
-    window['chartjs-gauge'].ArcElement,
-    window['chartjs-gauge'].LinearScale,
-    window['chartjs-gauge'].Tooltip
-  );
-</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-gauge@4.3.0/dist/chart-gauge.min.js"></script>
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {
