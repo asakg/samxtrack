@@ -9,10 +9,8 @@
         <div class="card-body">
           <h4 class="fw-bold mb-3">Loan Portfolio Overview</h4>
           <div style="max-width: 280px; margin: 0 auto;">
-            <canvas id="loanGauge" width="250" height="150"></canvas>
-          </div>
-          <div class="text-center mt-2">
-            <h6 class="fw-bold" id="coveredText"></h6>
+            <canvas id="loanSpeedometer" width="300" height="300"></canvas>
+            <p class="text-center fw-bold mt-2">{{ paid_off }} Paid Off</p>
           </div>
         </div>
       </div>
@@ -94,7 +92,7 @@
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.3"></script>
-<script src="https://cdn.jsdelivr.net/npm/gaugeJS@1.3.7/dist/gauge.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gaugeJS/dist/gauge.min.js"></script>
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {
@@ -127,48 +125,28 @@
     const pastDue = Number(stats.loans_past_due || 0);
     const total = Number(stats.total_loans || 0);
     const good = Math.max(0, total - paid - pastDue);
-    const covered = total > 0 ? Math.round(((paid + good) / total) * 100) : 0;
+    const paidPct = (paid / total * 100);
+    const pastPct = (pastDue / total * 100);
+    const goodPct = (good / total * 100);
 
-    const opts = {
-      angle: 0, // The span of the gauge arc
-      lineWidth: 0.2, // The line thickness
-      radiusScale: 0.9, // Relative radius
-      pointer: {
-        length: 0.6, // Relative to gauge radius
-        strokeWidth: 0.035, // The thickness
-        color: '#000000' // Fill color
-      },
-      limitMax: false,
-      limitMin: false,
-      colorStart: '#6FADCF',
-      colorStop: '#8FC0DA',
-      strokeColor: '#E0E0E0',
-      generateGradient: true,
-      highDpiSupport: true,
+    const gaugeValue = paidPct;
+
+    const gauge = new Gauge(document.getElementById("loanSpeedometer")).setOptions({
+      angle: 0, lineWidth: 0.2, radiusScale: 0.9,
+      pointer: { length: 0.6, strokeWidth: 0.035, color: "#000" },
       staticZones: [
-        { strokeStyle: "#F44336", min: 0, max: 30 },   // red
-        { strokeStyle: "#FFC107", min: 30, max: 70 },  // orange
-        { strokeStyle: "#4CAF50", min: 70, max: 100 }  // green
+        { strokeStyle: "#F44336", min: 0, max: pastPct },
+        { strokeStyle: "#FFC107", min: pastPct, max: pastPct + goodPct },
+        { strokeStyle: "#4CAF50", min: pastPct + goodPct, max: 100 }
       ],
-      staticLabels: {
-        font: "10px sans-serif",
-        labels: [0, 25, 50, 75, 100],
-        color: "#000",
-        fractionDigits: 0
-      }
-    };
+      limitMax: true,
+      limitMin: true,
+      highDpiSupport: true,
+    });
 
-    const gaugeTarget = document.getElementById('loanGauge');
-    const gauge = new Gauge(gaugeTarget).setOptions(opts);
     gauge.maxValue = 100;
     gauge.setMinValue(0);
-    gauge.animationSpeed = 40;
-    gauge.set(covered);
-
-    const coveredText = document.getElementById("coveredText");
-    if (coveredText) {
-      coveredText.textContent = covered + "% Covered";
-    }
+    gauge.set(gaugeValue);
   }); 
 </script>
 {% endblock %}
