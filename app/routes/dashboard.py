@@ -77,6 +77,10 @@ def dashboard_home():
     "percent_paid_off": round((len(df[df["Principal Balance"] == 0]) / len(df)) * 100, 1)
     })
 
+    # After your existing stats.update(...)
+    stats['paid_off'] = len(df[df["Principal Balance"] == 0])
+    stats['past_due_count'] = len(df[df["Days Late"] > 0])
+
     stats_block3 = {
     "Outstanding Principal": f"${stats['total_outstanding']:,.2f}",
     "Loans Past Due": stats["past_due_count"],
