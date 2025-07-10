@@ -90,20 +90,7 @@
     {{ stats | tojson | safe }}
 </script>
 
-
-<!-- Chart.js and gauge plugin (Chart.js v4 and chartjs-chart-gauge) -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.3"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-gauge@4.3.0/dist/chart-gauge.min.js"></script>
-
-<script>
-  // Manually register chartjs-chart-gauge components for Chart.js v4
-  Chart.register(
-    ChartGauge.GaugeController,
-    ChartGauge.ArcElement,
-    ChartGauge.LinearScale,
-    ChartGauge.Tooltip
-  );
-</script>
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {
@@ -138,45 +125,53 @@
     const pastDue = Number(stats.loans_past_due || 0);
     const total = Number(stats.total_loans || 0);
     const good = Math.max(0, total - paid - pastDue);
-    const value = total > 0 ? ((good + paid) / total * 100) : 0;
 
     // Debug log for chart data
-    console.log("Chart Data Debug →", { total, paid, pastDue, good, value });
+    console.log("Chart Data Debug →", { total, paid, pastDue, good });
 
-    new Chart(ctx, {
-      type: 'gauge',
+    const chart = new Chart(ctx, {
+      type: 'doughnut',
       data: {
         datasets: [{
-          value: value,
-          minValue: 0,
-          data: [25, 50, 25],
+          data: [pastDue, good, paid],
           backgroundColor: ['#F44336', '#FFC107', '#4CAF50'],
-          borderWidth: 2
+          borderWidth: 0
         }]
       },
       options: {
-        responsive: true,
-        title: {
-          display: true,
-          text: 'Covered'
+        rotation: -90,
+        circumference: 180,
+        cutout: '70%',
+        plugins: {
+          legend: { display: false }
         },
-        layout: {
-          padding: {
-            bottom: 20
+        animation: {
+          onComplete: function () {
+            const { width, height } = ctx.canvas;
+            const centerX = width / 2;
+            const centerY = height;
+
+            const total = pastDue + good + paid;
+            const value = (good + paid) / total;
+            const angle = Math.PI * value;
+
+            const needleLength = height * 0.6;
+            const endX = centerX + needleLength * Math.cos(angle - Math.PI);
+            const endY = centerY + needleLength * Math.sin(angle - Math.PI);
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.lineTo(endX, endY);
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#333';
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 5, 0, Math.PI * 2);
+            ctx.fillStyle = '#4285F4';
+            ctx.fill();
+            ctx.restore();
           }
-        },
-        needle: {
-          radiusPercentage: 2,
-          widthPercentage: 3.2,
-          lengthPercentage: 80,
-          color: '#444'
-        },
-        valueLabel: {
-          formatter: (val) => `${val.toFixed(1)}%`,
-          fontSize: 18,
-          color: '#111',
-          backgroundColor: '#fff',
-          borderRadius: 5
         }
       }
     });
