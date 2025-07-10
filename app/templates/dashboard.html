@@ -9,7 +9,7 @@
         <div class="card-body">
           <h4 class="fw-bold mb-3">Loan Portfolio Overview</h4>
           <div style="max-width: 280px; margin: 0 auto;">
-            <canvas id="loanSpeedometer" width="400" height="200"></canvas>
+            <canvas id="loanSpeedometer" width="300" height="300"></canvas>
           </div>
         </div>
       </div>
@@ -92,8 +92,7 @@
 
 <!-- Chart.js and plugin -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script
-  src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.1.0/dist/chartjs-plugin-annotation.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-gauge@0.4.0/dist/chartjs-gauge.min.js"></script>
 
 <script>
   const charts = JSON.parse(document.getElementById("chart-data").textContent);
@@ -121,77 +120,48 @@
     drawPieChart(chart + "Chart", charts[chart]);
   }
 
-  // Speedometer Data
-  const total = Number(stats.total_loans || 0);
+  const ctx = document.getElementById("loanSpeedometer").getContext("2d");
+
   const paid = Number(stats.paid_off || 0);
   const pastDue = Number(stats.loans_past_due || 0);
+  const total = Number(stats.total_loans || 0);
   const good = Math.max(0, total - paid - pastDue);
+  const value = total ? ((good + paid) / total * 100) : 0;
 
-  const paidPct = total ? (paid / total * 100).toFixed(1) : 0;
-  const pastPct = total ? (pastDue / total * 100).toFixed(1) : 0;
-  const goodPct = total ? (good / total * 100).toFixed(1) : 0;
-
-  // Debug print to make sure values exist
-  console.log("Speedometer Data →", { total, paid, good, pastDue, paidPct, pastPct, goodPct });
-
-  const ctx = document.getElementById("loanSpeedometer").getContext("2d");
-  const chartData = [pastDue || 0.1, good || 0.1, paid || 0.1];
-  const angle = (pastDue + good) / total;
-  const chart = new Chart(ctx, {
-    type: 'doughnut',
+  new Chart(ctx, {
+    type: 'gauge',
     data: {
-      labels: [
-        `Past Due (${pastPct}%)`,
-        `In Good Standing (${goodPct}%)`,
-        `Paid Off (${paidPct}%)`
-      ],
       datasets: [{
-        data: chartData,
+        value: value,
+        minValue: 0,
+        data: [25, 50, 25],
         backgroundColor: ['#F44336', '#FFC107', '#4CAF50'],
-        borderWidth: 0
+        borderWidth: 2
       }]
     },
     options: {
-      rotation: -Math.PI,
-      circumference: Math.PI,
-      cutout: '70%',
-      plugins: {
-        legend: {
-          display: false
-        },
-        tooltip: {
-          callbacks: {
-            label: ctx => `${ctx.label}`
-          }
+      responsive: true,
+      title: {
+        display: true,
+        text: 'Covered'
+      },
+      layout: {
+        padding: {
+          bottom: 20
         }
       },
-      animation: {
-        onComplete: function() {
-          const { width, height } = ctx.canvas;
-          const radius = Math.min(width, height) / 2;
-          const centerX = width / 2;
-          const centerY = height - 10;
-
-          const needleLength = radius * 0.75;
-          const needleAngle = Math.PI * angle;
-
-          const endX = centerX + needleLength * Math.cos(needleAngle - Math.PI);
-          const endY = centerY + needleLength * Math.sin(needleAngle - Math.PI);
-
-          const needleCtx = ctx;
-          needleCtx.save();
-          needleCtx.beginPath();
-          needleCtx.moveTo(centerX, centerY);
-          needleCtx.lineTo(endX, endY);
-          needleCtx.lineWidth = 3;
-          needleCtx.strokeStyle = '#333';
-          needleCtx.stroke();
-          needleCtx.beginPath();
-          needleCtx.arc(centerX, centerY, 6, 0, Math.PI * 2);
-          needleCtx.fillStyle = '#4285F4';
-          needleCtx.fill();
-          needleCtx.restore();
-        }
+      needle: {
+        radiusPercentage: 2,
+        widthPercentage: 3.2,
+        lengthPercentage: 80,
+        color: '#444'
+      },
+      valueLabel: {
+        formatter: (val) => `${val.toFixed(1)}%`,
+        fontSize: 18,
+        color: '#111',
+        backgroundColor: '#fff',
+        borderRadius: 5
       }
     }
   });
