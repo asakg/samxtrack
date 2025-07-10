@@ -2,56 +2,82 @@
 {% block content %}
 <div class="container-fluid mt-4">
 
-    <!-- Loan Portfolio Speedometer -->
-    <div class="row mb-4">
-        <div class="col text-center">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h4 class="fw-bold mb-3">Loan Portfolio Overview</h4>
-                    <canvas id="loanSpeedometer" width="400" height="200"></canvas>
-                </div>
-            </div>
+  <!-- Loan Portfolio Speedometer -->
+  <div class="row mb-4">
+    <div class="col text-center">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h4 class="fw-bold mb-3">Loan Portfolio Overview</h4>
+          <div style="max-width: 600px; margin: 0 auto;">
+            <canvas id="loanSpeedometer"></canvas>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 
-    <!-- Loan Summary -->
-    <div class="row mb-4">
-        <div class="col">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h4 class="fw-bold mb-3">Loan Summary</h4>
-                    <div class="row text-center">
-                        <div class="col-md-2"><p class="mb-1">Total Loans</p><h5>{{ stats.total_loans }}</h5></div>
-                        <div class="col-md-2"><p class="mb-1">Active Borrowers</p><h5 class="text-primary">{{ stats.active_borrowers }}</h5></div>
-                        <div class="col-md-2"><p class="mb-1">Inactive Borrowers</p><h5 class="text-warning">{{ stats.inactive_borrowers }}</h5></div>
-                        <div class="col-md-2"><p class="mb-1">Critical Loans</p><h5 class="text-danger">{{ stats.critical_loans }}</h5></div>
-                        <div class="col-md-2"><p class="mb-1">Missing Contract</p><h5 class="text-warning">{{ stats.missing_contract }}</h5></div>
-                        <div class="col-md-2"><p class="mb-1">Loans w/ Title</p><h5 class="text-success">{{ stats.title_loans }}</h5></div>
-                        <div class="col-md-2 mt-3"><p class="mb-1">With Guarantor</p><h5 class="text-success">{{ stats.with_guarantor }}</h5></div>
-                        <div class="col-md-2 mt-3"><p class="mb-1">No Title & No Guarantor</p><h5>{{ stats.no_title_guarantor }}</h5></div>
-                    </div>
-                </div>
+  <!-- Loan Summary -->
+  <div class="row mb-4">
+    <div class="col">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h4 class="fw-bold mb-3">Loan Summary</h4>
+          <div class="row text-center">
+            <div class="col-md-2">
+              <p class="mb-1">Total Loans</p>
+              <h5>{{ stats.total_loans }}</h5>
             </div>
+            <div class="col-md-2">
+              <p class="mb-1">Active Borrowers</p>
+              <h5 class="text-primary">{{ stats.active_borrowers }}</h5>
+            </div>
+            <div class="col-md-2">
+              <p class="mb-1">Inactive Borrowers</p>
+              <h5 class="text-warning">{{ stats.inactive_borrowers }}</h5>
+            </div>
+            <div class="col-md-2">
+              <p class="mb-1">Critical Loans</p>
+              <h5 class="text-danger">{{ stats.critical_loans }}</h5>
+            </div>
+            <div class="col-md-2">
+              <p class="mb-1">Missing Contract</p>
+              <h5 class="text-warning">{{ stats.missing_contract }}</h5>
+            </div>
+            <div class="col-md-2">
+              <p class="mb-1">Loans w/ Title</p>
+              <h5 class="text-success">{{ stats.title_loans }}</h5>
+            </div>
+            <div class="col-md-2 mt-3">
+              <p class="mb-1">With Guarantor</p>
+              <h5 class="text-success">{{ stats.with_guarantor }}</h5>
+            </div>
+            <div class="col-md-2 mt-3">
+              <p class="mb-1">No Title & No Guarantor</p>
+              <h5>{{ stats.no_title_guarantor }}</h5>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 
-    <!-- Loan Health Charts -->
-    <div class="row mb-4">
-        <div class="col">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h4 class="fw-bold mb-3">Loan Health Charts</h4>
-                    <div class="row text-center">
-                        {% for chart, data in charts_data.items() %}
-                        <div class="col-md-2">
-                            <canvas id="{{ chart }}Chart"></canvas>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
+  <!-- Loan Health Charts -->
+  <div class="row mb-4">
+    <div class="col">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h4 class="fw-bold mb-3">Loan Health Charts</h4>
+          <div class="row text-center">
+            {% for chart, data in charts_data.items() %}
+            <div class="col-md-2">
+              <canvas id="{{ chart }}Chart"></canvas>
             </div>
+            {% endfor %}
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 </div>
 
 <!-- Embedded chart data -->
@@ -66,90 +92,95 @@
 
 <!-- Chart.js and plugin -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.1.0/dist/chartjs-plugin-annotation.min.js"></script>
+<script
+  src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.1.0/dist/chartjs-plugin-annotation.min.js"></script>
 
 <script>
-    const charts = JSON.parse(document.getElementById("chart-data").textContent);
-    const stats = JSON.parse(document.getElementById("stats-data").textContent);
+  const charts = JSON.parse(document.getElementById("chart-data").textContent);
+  const stats = JSON.parse(document.getElementById("stats-data").textContent);
 
-    function drawPieChart(id, data) {
-        const ctx = document.getElementById(id).getContext("2d");
-        new Chart(ctx, {
-            type: "doughnut",
-            data: {
-                labels: Object.keys(data),
-                datasets: [{
-                    data: Object.values(data),
-                    backgroundColor: ["#4CAF50", "#FFC107", "#2196F3", "#F44336", "#9C27B0", "#FF5722"]
-                }]
-            },
-            options: {
-                cutout: "70%",
-                plugins: { legend: { position: 'bottom' } }
-            }
-        });
-    }
-
-    for (const chart in charts) {
-        drawPieChart(chart + "Chart", charts[chart]);
-    }
-
-    // Speedometer Data
-    const total = stats.total_loans;
-    const paid = stats.paid_off;
-    const pastDue = stats.loans_past_due;
-    const good = total - paid - pastDue;
-
-    const paidPct = (paid / total * 100).toFixed(1);
-    const pastPct = (pastDue / total * 100).toFixed(1);
-    const goodPct = (good / total * 100).toFixed(1);
-
-    const ctx = document.getElementById("loanSpeedometer").getContext("2d");
+  function drawPieChart(id, data) {
+    const ctx = document.getElementById(id).getContext("2d");
     new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: [
-                `Past Due (${pastPct}%)`,
-                `In Good Standing (${goodPct}%)`,
-                `Paid Off (${paidPct}%)`
-            ],
-            datasets: [{
-                data: [pastDue, good, paid],
-                backgroundColor: ['#F44336', '#FFC107', '#4CAF50'],
-                borderWidth: 0
-            }]
-        },
-        options: {
-            rotation: -90,
-            circumference: 180,
-            cutout: '70%',
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'bottom',
-                },
-                tooltip: {
-                    callbacks: {
-                        label: ctx => `${ctx.label}`
-                    }
-                },
-                annotation: {
-                    annotations: {
-                        pointer: {
-                            type: 'line',
-                            xMin: 0,
-                            xMax: 200,
-                            yMin: 100,
-                            yMax: 0,
-                            borderColor: '#000',
-                            borderWidth: 2,
-                            borderDash: [2, 2],
-                            scaleID: 'x-axis-0'
-                        }
-                    }
-                }
-            }
-        }
+      type: "doughnut",
+      data: {
+        labels: Object.keys(data),
+        datasets: [{
+          data: Object.values(data),
+          backgroundColor: ["#4CAF50", "#FFC107", "#2196F3", "#F44336", "#9C27B0", "#FF5722"]
+        }]
+      },
+      options: {
+        cutout: "70%",
+        plugins: { legend: { position: 'bottom' } }
+      }
     });
+  }
+
+  for (const chart in charts) {
+    drawPieChart(chart + "Chart", charts[chart]);
+  }
+
+  // Speedometer Data
+  const total = Number(stats.total_loans || 0);
+  const paid = Number(stats.paid_off || 0);
+  const pastDue = Number(stats.loans_past_due || 0);
+  const good = total - paid - pastDue;
+
+  const paidPct = (paid / total * 100).toFixed(1);
+  const pastPct = (pastDue / total * 100).toFixed(1);
+  const goodPct = (good / total * 100).toFixed(1);
+
+  // Debug print to make sure values exist
+  console.log("Speedometer Data →", { total, paid, good, pastDue, paidPct, pastPct, goodPct });
+
+  const ctx = document.getElementById("loanSpeedometer").getContext("2d");
+  new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: [
+        `Past Due (${pastPct}%)`,
+        `In Good Standing (${goodPct}%)`,
+        `Paid Off (${paidPct}%)`
+      ],
+      datasets: [{
+        data: [pastDue, good, paid],
+        backgroundColor: ['#F44336', '#FFC107', '#4CAF50'],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      rotation: -90,
+      circumference: 180,
+      cutout: '70%',
+      plugins: {
+        legend: {
+          display: true,
+          position: 'bottom',
+        },
+        tooltip: {
+          callbacks: {
+            label: ctx => `${ctx.label}`
+          }
+        },
+        annotation: {
+          annotations: {
+            needle: {
+              type: 'line',
+              borderColor: '#000',
+              borderWidth: 2,
+              borderDash: [5, 5],
+              label: {
+                display: false
+              },
+              scaleID: 'r',
+              value: (pastDue + good + paid / 2) / total * 180 - 90,
+              borderDashOffset: 0
+            }
+          }
+        }
+      }
+    }
+  });
 </script>
 {% endblock %}
