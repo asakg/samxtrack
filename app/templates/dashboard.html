@@ -119,75 +119,77 @@
       drawPieChart(chart + "Chart", charts[chart]);
     }
 
-    const ctx = document.getElementById("loanSpeedometer").getContext("2d");
-
     const paid = Number(stats.paid_off || 0);
     const pastDue = Number(stats.loans_past_due || 0);
     const total = Number(stats.total_loans || 0);
     const good = Math.max(0, total - paid - pastDue);
 
-    // Debug log for chart data
-    console.log("Chart Data Debug →", { total, paid, pastDue, good });
+    const paidPct = (paid / total) * 100;
+    const goodPct = (good / total) * 100;
+    const pastPct = (pastDue / total) * 100;
 
-    const coveredPct = ((paid + good) / total * 100).toFixed(0);
+    const centerLabel = 'COVERED';
+    const percentLabel = `${paidPct.toFixed(0)}%`;
 
-    new Chart(ctx, {
+    const ctx = document.getElementById("loanSpeedometer").getContext("2d");
+    const gaugeChart = new Chart(ctx, {
       type: 'doughnut',
       data: {
-        labels: ['Past Due', 'In Good Standing', 'Paid Off'],
+        labels: ['Past Due', 'In Good Standing', 'Paid Off', 'Empty'],
         datasets: [{
-          data: [pastDue, good, paid],
-          backgroundColor: ['#E53935', '#FB8C00', '#43A047'],
+          data: [pastPct, goodPct, paidPct, 100 - (pastPct + goodPct + paidPct)],
+          backgroundColor: ['#F44336', '#FFC107', '#4CAF50', 'transparent'],
           borderWidth: 10,
-          borderColor: '#eee',
-          cutout: '75%',
+          borderColor: ['#F44336', '#FFC107', '#4CAF50', 'transparent'],
+          cutout: '80%',
+          circumference: 270,
+          rotation: 225
         }]
       },
       options: {
         responsive: true,
-        rotation: -Math.PI,
-        circumference: Math.PI,
-        cutout: '70%',
+        maintainAspectRatio: false,
         plugins: {
           legend: { display: false },
-          tooltip: {
-            callbacks: {
-              label: ctx => `${ctx.label}: ${ctx.raw}`
-            }
-          }
+          tooltip: { enabled: false }
         },
         animation: {
           onComplete: function () {
-            const { width, height } = ctx.canvas;
+            const chart = this.chart;
+            const { width, height } = chart;
             const centerX = width / 2;
-            const centerY = height / 1.07;
-            const totalValue = pastDue + good + paid;
-            const targetValue = (good + paid) / totalValue;
-            const angle = Math.PI * targetValue;
+            const centerY = height / 2;
+            const radius = Math.min(width, height) / 2 * 0.8;
 
-            const needleLength = height / 2.5;
-            const endX = centerX + needleLength * Math.cos(angle - Math.PI);
-            const endY = centerY + needleLength * Math.sin(angle - Math.PI);
-
+            const ctx = chart.ctx;
             ctx.save();
+
+            // Draw center text
+            ctx.fillStyle = '#444';
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(centerLabel, centerX, centerY);
+            ctx.font = 'bold 22px Arial';
+            ctx.fillText(percentLabel, centerX, centerY + 25);
+
+            // Draw needle
+            const angle = (225 + (paidPct * 270 / 100)) * Math.PI / 180;
+            const needleLength = radius * 0.9;
+            const endX = centerX + needleLength * Math.cos(angle);
+            const endY = centerY + needleLength * Math.sin(angle);
+
             ctx.beginPath();
             ctx.moveTo(centerX, centerY);
             ctx.lineTo(endX, endY);
-            ctx.lineWidth = 3;
             ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
             ctx.stroke();
 
             ctx.beginPath();
-            ctx.arc(centerX, centerY, 5, 0, Math.PI * 2);
+            ctx.arc(centerX, centerY, 5, 0, 2 * Math.PI);
             ctx.fillStyle = '#4285F4';
             ctx.fill();
 
-            ctx.font = 'bold 16px Arial';
-            ctx.fillStyle = '#444';
-            ctx.textAlign = 'center';
-            ctx.fillText('COVERED', centerX, centerY + 30);
-            ctx.font = 'bold 22px Arial';
-            ctx.fillText(`${coveredPct}%`, centerX, centerY + 60);
             ctx.restore();
           }
         }
