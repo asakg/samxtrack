@@ -152,7 +152,8 @@
             const centerY = height;
 
             const total = pastDue + good + paid;
-            const value = (good + paid) / total;
+            const paidPct = total > 0 ? paid / total : 0;
+            const value = 1 - paidPct;
             const angle = Math.PI * value;
 
             const needleLength = height * 0.6;
@@ -171,6 +172,13 @@
             ctx.fillStyle = '#4285F4';
             ctx.fill();
             ctx.restore();
+
+            ctx.fillStyle = '#444';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('0%', centerX - needleLength, centerY - 10);
+            ctx.fillText('50%', centerX, centerY - needleLength - 10);
+            ctx.fillText('100%', centerX + needleLength, centerY - 10);
           }
         }
       }
