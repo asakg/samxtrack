@@ -9,8 +9,8 @@
         <div class="card-body">
           <h4 class="fw-bold mb-3">Loan Portfolio Overview</h4>
           <div style="max-width: 280px; margin: 0 auto;">
-            <canvas id="loanSpeedometer" width="300" height="300"></canvas>
-            <p class="text-center fw-bold mt-2">{{ paid_off }} Paid Off</p>
+            <canvas id="loanSpeedometer" width="250" height="150"></canvas>
+            <p class="text-center fw-bold mt-2" id="paidOffText"></p>
           </div>
         </div>
       </div>
@@ -125,28 +125,48 @@
     const pastDue = Number(stats.loans_past_due || 0);
     const total = Number(stats.total_loans || 0);
     const good = Math.max(0, total - paid - pastDue);
-    const paidPct = (paid / total * 100);
+    const paidPct = total > 0 ? Math.round((paid / total) * 100) : 0;
     const pastPct = (pastDue / total * 100);
     const goodPct = (good / total * 100);
 
     const gaugeValue = paidPct;
 
     const gauge = new Gauge(document.getElementById("loanSpeedometer")).setOptions({
-      angle: 0, lineWidth: 0.2, radiusScale: 0.9,
-      pointer: { length: 0.6, strokeWidth: 0.035, color: "#000" },
+      angle: 0, // start from top (semi-circle)
+      lineWidth: 0.2,
+      radiusScale: 0.9,
+      pointer: {
+        length: 0.5,
+        strokeWidth: 0.05,
+        color: "#000000"
+      },
       staticZones: [
-        { strokeStyle: "#F44336", min: 0, max: pastPct },
-        { strokeStyle: "#FFC107", min: pastPct, max: pastPct + goodPct },
-        { strokeStyle: "#4CAF50", min: pastPct + goodPct, max: 100 }
+        { strokeStyle: "#F44336", min: 0, max: 25 },
+        { strokeStyle: "#FFC107", min: 25, max: 75 },
+        { strokeStyle: "#4CAF50", min: 75, max: 100 }
       ],
+      staticLabels: {
+        font: "10px sans-serif",
+        labels: [0, 25, 50, 75, 100],
+        color: "#000",
+        fractionDigits: 0
+      },
       limitMax: true,
       limitMin: true,
+      generateGradient: false,
       highDpiSupport: true,
+      renderTicks: {
+        divisions: 5,
+        divWidth: 1.1,
+        divLength: 0.7,
+        divColor: "#333333",
+      }
     });
 
     gauge.maxValue = 100;
     gauge.setMinValue(0);
-    gauge.set(gaugeValue);
+    gauge.set(paidPct);
+    document.getElementById("paidOffText").textContent = paidPct + "% Paid Off";
   }); 
 </script>
 {% endblock %}
