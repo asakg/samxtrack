@@ -129,48 +129,65 @@
     // Debug log for chart data
     console.log("Chart Data Debug →", { total, paid, pastDue, good });
 
-    const chart = new Chart(ctx, {
+    const coveredPct = ((paid + good) / total * 100).toFixed(0);
+
+    new Chart(ctx, {
       type: 'doughnut',
       data: {
+        labels: ['Past Due', 'In Good Standing', 'Paid Off'],
         datasets: [{
           data: [pastDue, good, paid],
-          backgroundColor: ['#F44336', '#FFC107', '#4CAF50'],
-          borderWidth: 0
+          backgroundColor: ['#E53935', '#FB8C00', '#43A047'],
+          borderWidth: 10,
+          borderColor: '#eee',
+          cutout: '75%',
         }]
       },
       options: {
-        rotation: -90,
-        circumference: 180,
+        responsive: true,
+        rotation: -Math.PI,
+        circumference: Math.PI,
         cutout: '70%',
         plugins: {
-          legend: { display: false }
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: ctx => `${ctx.label}: ${ctx.raw}`
+            }
+          }
         },
         animation: {
           onComplete: function () {
             const { width, height } = ctx.canvas;
             const centerX = width / 2;
-            const centerY = height;
-
+            const centerY = height / 1.07;
             const totalValue = pastDue + good + paid;
-            const currentValue = pastDue + good; // position at start of green section
+            const targetValue = (good + paid) / totalValue;
+            const angle = Math.PI * targetValue;
 
-            const angle = (-0.5 * Math.PI) + (Math.PI * (currentValue / totalValue));
-            const needleLength = height * 0.4;
-
-            const endX = centerX + needleLength * Math.cos(angle);
-            const endY = centerY + needleLength * Math.sin(angle);
+            const needleLength = height / 2.5;
+            const endX = centerX + needleLength * Math.cos(angle - Math.PI);
+            const endY = centerY + needleLength * Math.sin(angle - Math.PI);
 
             ctx.save();
             ctx.beginPath();
             ctx.moveTo(centerX, centerY);
             ctx.lineTo(endX, endY);
             ctx.lineWidth = 3;
-            ctx.strokeStyle = '#000';
+            ctx.strokeStyle = '#333';
             ctx.stroke();
+
             ctx.beginPath();
-            ctx.arc(centerX, centerY, 4, 0, Math.PI * 2);
+            ctx.arc(centerX, centerY, 5, 0, Math.PI * 2);
             ctx.fillStyle = '#4285F4';
             ctx.fill();
+
+            ctx.font = 'bold 16px Arial';
+            ctx.fillStyle = '#444';
+            ctx.textAlign = 'center';
+            ctx.fillText('COVERED', centerX, centerY + 30);
+            ctx.font = 'bold 22px Arial';
+            ctx.fillText(`${coveredPct}%`, centerX, centerY + 60);
             ctx.restore();
           }
         }
