@@ -8,7 +8,7 @@
       <div class="card shadow-sm">
         <div class="card-body">
           <h4 class="fw-bold mb-3">Loan Portfolio Overview</h4>
-          <div style="max-width: 320px; margin: 0 auto;">
+          <div style="max-width: 280px; margin: 0 auto;">
             <canvas id="loanSpeedometer" width="400" height="200"></canvas>
           </div>
         </div>
@@ -136,7 +136,8 @@
 
   const ctx = document.getElementById("loanSpeedometer").getContext("2d");
   const chartData = [pastDue || 0.1, good || 0.1, paid || 0.1];
-  new Chart(ctx, {
+  const angle = (pastDue + good) / total;
+  const chart = new Chart(ctx, {
     type: 'doughnut',
     data: {
       labels: [
@@ -151,35 +152,45 @@
       }]
     },
     options: {
-      rotation: -90,
-      circumference: 180,
+      rotation: -Math.PI,
+      circumference: Math.PI,
       cutout: '70%',
       plugins: {
         legend: {
-          display: true,
-          position: 'bottom',
+          display: false
         },
         tooltip: {
           callbacks: {
             label: ctx => `${ctx.label}`
           }
-        },
-        annotation: {
-          annotations: {
-            needle: {
-              type: 'line',
-              xMin: 0,
-              xMax: Math.cos((Math.PI * ((pastDue + good) / total)) - Math.PI),
-              yMin: 0,
-              yMax: Math.sin((Math.PI * ((pastDue + good) / total)) - Math.PI),
-              borderColor: 'black',
-              borderWidth: 3,
-              borderDash: [2, 2],
-              label: {
-                display: false
-              }
-            }
-          }
+        }
+      },
+      animation: {
+        onComplete: function() {
+          const { width, height } = ctx.canvas;
+          const radius = Math.min(width, height) / 2;
+          const centerX = width / 2;
+          const centerY = height - 10;
+
+          const needleLength = radius * 0.75;
+          const needleAngle = Math.PI * angle;
+
+          const endX = centerX + needleLength * Math.cos(needleAngle - Math.PI);
+          const endY = centerY + needleLength * Math.sin(needleAngle - Math.PI);
+
+          const needleCtx = ctx;
+          needleCtx.save();
+          needleCtx.beginPath();
+          needleCtx.moveTo(centerX, centerY);
+          needleCtx.lineTo(endX, endY);
+          needleCtx.lineWidth = 3;
+          needleCtx.strokeStyle = '#333';
+          needleCtx.stroke();
+          needleCtx.beginPath();
+          needleCtx.arc(centerX, centerY, 6, 0, Math.PI * 2);
+          needleCtx.fillStyle = '#4285F4';
+          needleCtx.fill();
+          needleCtx.restore();
         }
       }
     }
