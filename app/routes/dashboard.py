@@ -79,7 +79,7 @@ def dashboard_home():
 
     # After your existing stats.update(...)
     stats['paid_off'] = len(df[df["Principal Balance"] == 0])
-    stats['past_due_count'] = len(df[df["Days Late"] > 0])
+    stats['loans_past_due'] = len(df[df["Days Late"] > 0])
 
     stats_block3 = {
     "Outstanding Principal": f"${stats['total_outstanding']:,.2f}",
