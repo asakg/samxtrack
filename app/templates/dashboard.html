@@ -9,7 +9,10 @@
         <div class="card-body">
           <h4 class="fw-bold mb-3">Loan Portfolio Overview</h4>
           <div style="max-width: 280px; margin: 0 auto;">
-            <canvas id="loanSpeedometer" width="300" height="300"></canvas>
+            <canvas id="loanGauge" width="250" height="150"></canvas>
+          </div>
+          <div class="text-center mt-2">
+            <h6 class="fw-bold" id="coveredText"></h6>
           </div>
         </div>
       </div>
@@ -91,6 +94,7 @@
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.3"></script>
+<script src="https://cdn.jsdelivr.net/npm/gaugeJS@1.3.7/dist/gauge.min.js"></script>
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {
@@ -123,78 +127,48 @@
     const pastDue = Number(stats.loans_past_due || 0);
     const total = Number(stats.total_loans || 0);
     const good = Math.max(0, total - paid - pastDue);
+    const covered = total > 0 ? Math.round(((paid + good) / total) * 100) : 0;
 
-    const paidPct = (paid / total) * 100;
-    const goodPct = (good / total) * 100;
-    const pastPct = (pastDue / total) * 100;
-
-    const centerLabel = 'COVERED';
-    const percentLabel = `${paidPct.toFixed(0)}%`;
-
-    const ctx = document.getElementById("loanSpeedometer").getContext("2d");
-    const gaugeChart = new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels: ['Past Due', 'In Good Standing', 'Paid Off', 'Empty'],
-        datasets: [{
-          data: [pastPct, goodPct, paidPct, 100 - (pastPct + goodPct + paidPct)],
-          backgroundColor: ['#F44336', '#FFC107', '#4CAF50', 'transparent'],
-          borderWidth: 10,
-          borderColor: ['#F44336', '#FFC107', '#4CAF50', 'transparent'],
-          cutout: '80%',
-          circumference: 270,
-          rotation: 225
-        }]
+    const opts = {
+      angle: 0, // The span of the gauge arc
+      lineWidth: 0.2, // The line thickness
+      radiusScale: 0.9, // Relative radius
+      pointer: {
+        length: 0.6, // Relative to gauge radius
+        strokeWidth: 0.035, // The thickness
+        color: '#000000' // Fill color
       },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: { enabled: false }
-        },
-        animation: {
-          onComplete: function () {
-            const chart = this.chart;
-            const { width, height } = chart;
-            const centerX = width / 2;
-            const centerY = height / 2;
-            const radius = Math.min(width, height) / 2 * 0.8;
-
-            const ctx = chart.ctx;
-            ctx.save();
-
-            // Draw center text
-            ctx.fillStyle = '#444';
-            ctx.font = 'bold 16px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText(centerLabel, centerX, centerY);
-            ctx.font = 'bold 22px Arial';
-            ctx.fillText(percentLabel, centerX, centerY + 25);
-
-            // Draw needle
-            const angle = (225 + (paidPct * 270 / 100)) * Math.PI / 180;
-            const needleLength = radius * 0.9;
-            const endX = centerX + needleLength * Math.cos(angle);
-            const endY = centerY + needleLength * Math.sin(angle);
-
-            ctx.beginPath();
-            ctx.moveTo(centerX, centerY);
-            ctx.lineTo(endX, endY);
-            ctx.strokeStyle = '#333';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, 5, 0, 2 * Math.PI);
-            ctx.fillStyle = '#4285F4';
-            ctx.fill();
-
-            ctx.restore();
-          }
-        }
+      limitMax: false,
+      limitMin: false,
+      colorStart: '#6FADCF',
+      colorStop: '#8FC0DA',
+      strokeColor: '#E0E0E0',
+      generateGradient: true,
+      highDpiSupport: true,
+      staticZones: [
+        { strokeStyle: "#F44336", min: 0, max: 30 },   // red
+        { strokeStyle: "#FFC107", min: 30, max: 70 },  // orange
+        { strokeStyle: "#4CAF50", min: 70, max: 100 }  // green
+      ],
+      staticLabels: {
+        font: "10px sans-serif",
+        labels: [0, 25, 50, 75, 100],
+        color: "#000",
+        fractionDigits: 0
       }
-    });
+    };
+
+    const gaugeTarget = document.getElementById('loanGauge');
+    const gauge = new Gauge(gaugeTarget).setOptions(opts);
+    gauge.maxValue = 100;
+    gauge.setMinValue(0);
+    gauge.animationSpeed = 40;
+    gauge.set(covered);
+
+    const coveredText = document.getElementById("coveredText");
+    if (coveredText) {
+      coveredText.textContent = covered + "% Covered";
+    }
   }); 
 </script>
 {% endblock %}
