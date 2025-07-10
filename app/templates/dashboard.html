@@ -90,9 +90,20 @@
     {{ stats | tojson | safe }}
 </script>
 
-<!-- Chart.js and plugin (version pairing for gauge compatibility) -->
+
+<!-- Chart.js and gauge plugin (Chart.js v4 and chartjs-chart-gauge) -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.3"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-gauge@4.3.0/dist/chart-gauge.min.js"></script>
+
+<script>
+  // Manually register chartjs-chart-gauge components for Chart.js v4
+  Chart.register(
+    ChartGauge.GaugeController,
+    ChartGauge.ArcElement,
+    ChartGauge.LinearScale,
+    ChartGauge.Tooltip
+  );
+</script>
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {
