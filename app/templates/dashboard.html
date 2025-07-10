@@ -95,75 +95,80 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-gauge@0.4.0/dist/chartjs-gauge.min.js"></script>
 
 <script>
-  const charts = JSON.parse(document.getElementById("chart-data").textContent);
-  const stats = JSON.parse(document.getElementById("stats-data").textContent);
+  document.addEventListener("DOMContentLoaded", function () {
+    const charts = JSON.parse(document.getElementById("chart-data").textContent);
+    const stats = JSON.parse(document.getElementById("stats-data").textContent);
 
-  function drawPieChart(id, data) {
-    const ctx = document.getElementById(id).getContext("2d");
+    function drawPieChart(id, data) {
+      const ctx = document.getElementById(id).getContext("2d");
+      new Chart(ctx, {
+        type: "doughnut",
+        data: {
+          labels: Object.keys(data),
+          datasets: [{
+            data: Object.values(data),
+            backgroundColor: ["#4CAF50", "#FFC107", "#2196F3", "#F44336", "#9C27B0", "#FF5722"]
+          }]
+        },
+        options: {
+          cutout: "70%",
+          plugins: { legend: { position: 'bottom' } }
+        }
+      });
+    }
+
+    for (const chart in charts) {
+      drawPieChart(chart + "Chart", charts[chart]);
+    }
+
+    const ctx = document.getElementById("loanSpeedometer").getContext("2d");
+
+    const paid = Number(stats.paid_off || 0);
+    const pastDue = Number(stats.loans_past_due || 0);
+    const total = Number(stats.total_loans || 0);
+    const good = Math.max(0, total - paid - pastDue);
+    const value = total > 0 ? ((good + paid) / total * 100) : 0;
+
+    // Debug log for chart data
+    console.log("Chart Data Debug →", { total, paid, pastDue, good, value });
+
     new Chart(ctx, {
-      type: "doughnut",
+      type: 'gauge',
       data: {
-        labels: Object.keys(data),
         datasets: [{
-          data: Object.values(data),
-          backgroundColor: ["#4CAF50", "#FFC107", "#2196F3", "#F44336", "#9C27B0", "#FF5722"]
+          value: value,
+          minValue: 0,
+          data: [25, 50, 25],
+          backgroundColor: ['#F44336', '#FFC107', '#4CAF50'],
+          borderWidth: 2
         }]
       },
       options: {
-        cutout: "70%",
-        plugins: { legend: { position: 'bottom' } }
+        responsive: true,
+        title: {
+          display: true,
+          text: 'Covered'
+        },
+        layout: {
+          padding: {
+            bottom: 20
+          }
+        },
+        needle: {
+          radiusPercentage: 2,
+          widthPercentage: 3.2,
+          lengthPercentage: 80,
+          color: '#444'
+        },
+        valueLabel: {
+          formatter: (val) => `${val.toFixed(1)}%`,
+          fontSize: 18,
+          color: '#111',
+          backgroundColor: '#fff',
+          borderRadius: 5
+        }
       }
     });
-  }
-
-  for (const chart in charts) {
-    drawPieChart(chart + "Chart", charts[chart]);
-  }
-
-  const ctx = document.getElementById("loanSpeedometer").getContext("2d");
-
-  const paid = Number(stats.paid_off || 0);
-  const pastDue = Number(stats.loans_past_due || 0);
-  const total = Number(stats.total_loans || 0);
-  const good = Math.max(0, total - paid - pastDue);
-  const value = total ? ((good + paid) / total * 100) : 0;
-
-  new Chart(ctx, {
-    type: 'gauge',
-    data: {
-      datasets: [{
-        value: value,
-        minValue: 0,
-        data: [25, 50, 25],
-        backgroundColor: ['#F44336', '#FFC107', '#4CAF50'],
-        borderWidth: 2
-      }]
-    },
-    options: {
-      responsive: true,
-      title: {
-        display: true,
-        text: 'Covered'
-      },
-      layout: {
-        padding: {
-          bottom: 20
-        }
-      },
-      needle: {
-        radiusPercentage: 2,
-        widthPercentage: 3.2,
-        lengthPercentage: 80,
-        color: '#444'
-      },
-      valueLabel: {
-        formatter: (val) => `${val.toFixed(1)}%`,
-        fontSize: 18,
-        color: '#111',
-        backgroundColor: '#fff',
-        borderRadius: 5
-      }
-    }
   });
 </script>
 {% endblock %}
