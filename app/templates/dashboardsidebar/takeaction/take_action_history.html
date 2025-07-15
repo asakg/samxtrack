@@ -1,0 +1,44 @@
+
+
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h3 class="fw-bold mb-3">📅 Past Contact History</h3>
+  {% if history %}
+  <div class="table-responsive">
+    <table class="table table-bordered table-striped table-sm">
+      <thead>
+        <tr>
+          <th>Week</th>
+          <th>Borrower</th>
+          <th>Balance</th>
+          <th>Category</th>
+          <th>Contacted</th>
+          <th>Note</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in history %}
+        <tr>
+          <td>{{ entry.week }}</td>
+          <td>{{ entry.borrower }}</td>
+          <td>${{ '{:,.2f}'.format(entry.balance) }}</td>
+          <td>{{ entry.category if entry.category else 'N/A' }}</td>
+          <td>
+            {% if entry.contacted %}
+              <span class="badge bg-success">Yes</span>
+            {% else %}
+              <span class="badge bg-danger">No</span>
+            {% endif %}
+          </td>
+          <td>{{ entry.note }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <p>No contact history available.</p>
+  {% endif %}
+</div>
+{% endblock %}

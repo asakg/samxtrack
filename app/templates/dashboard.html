@@ -1,17 +1,68 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container-fluid mt-4">
+<div class="container-fluid mt-0">
 
-  <!-- Loan Portfolio Speedometer -->
-  <div class="row mb-4">
-    <div class="col text-center">
-      <div class="card shadow-sm">
+  <!-- Card styling for Loan Summary cards -->
+  <style>
+    html, body {
+      height: 100%;
+      overflow-x: hidden;
+    }
+
+    .container-fluid {
+      padding-bottom: 0 !important;
+      margin-bottom: 0 !important;
+    }
+
+    .row.mb-4 {
+      margin-bottom: 0.75rem !important;
+    }
+
+    .card-body {
+      padding: 0.75rem !important;
+    }
+
+    .card .card-body {
+      min-height: 80px;
+    }
+
+    .card h5 {
+      font-size: 1.25rem;
+    }
+
+    .card p {
+      font-size: 0.85rem;
+    }
+    /* Custom: Reduce vertical spacing between dashboard sections */
+    .mb-4 {
+      margin-bottom: 0.5rem !important;
+    }
+
+    .alert {
+      padding: 0.4rem 0.6rem;
+      font-size: 0.75rem;
+    }
+  </style>
+
+  <!-- Updated Speedometer + Dollar Breakdown Row -->
+  <div class="row mb-4 d-flex align-items-stretch">
+    <div class="col-md-6 text-center">
+      <div class="card shadow-sm h-100">
         <div class="card-body">
           <h4 class="fw-bold mb-3">Loan Portfolio Overview</h4>
           <div style="max-width: 280px; margin: 0 auto;">
             <canvas id="loanSpeedometer" width="250" height="150"></canvas>
             <p class="text-center fw-bold mt-2" id="paidOffText"></p>
           </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 text-center">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h4 class="fw-bold mb-3">Total Loan Amount Breakdown</h4>
+          <h6 class="text-muted">Total Loan Amount: ${{ "{:,.2f}".format(amount_breakdown["Total Loan Amount"] or 0) }}</h6>
+          <canvas id="loanAmountChart" height="130"></canvas>
         </div>
       </div>
     </div>
@@ -23,38 +74,70 @@
       <div class="card shadow-sm">
         <div class="card-body">
           <h4 class="fw-bold mb-3">Loan Summary</h4>
-          <div class="row text-center">
-            <div class="col-md-2">
-              <p class="mb-1">Total Loans</p>
-              <h5>{{ stats.total_loans }}</h5>
+          <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3 text-center">
+            <div class="col">
+              <div class="card shadow-sm h-100">
+                <div class="card-body">
+                  <p class="text-muted mb-1"><i class="fas fa-chart-bar me-1 text-dark"></i> Total Loans</p>
+                  <h5 class="fw-bold text-dark">{{ stats.total_loans }}</h5>
+                </div>
+              </div>
             </div>
-            <div class="col-md-2">
-              <p class="mb-1">Active Borrowers</p>
-              <h5 class="text-primary">{{ stats.active_borrowers }}</h5>
+            <div class="col">
+              <div class="card shadow-sm h-100">
+                <div class="card-body">
+                  <p class="text-muted mb-1"><i class="fas fa-user-check me-1 text-primary"></i> Active Borrowers</p>
+                  <h5 class="fw-bold text-primary">{{ stats.active_borrowers }}</h5>
+                </div>
+              </div>
             </div>
-            <div class="col-md-2">
-              <p class="mb-1">Inactive Borrowers</p>
-              <h5 class="text-warning">{{ stats.inactive_borrowers }}</h5>
+            <div class="col">
+              <div class="card shadow-sm h-100">
+                <div class="card-body">
+                  <p class="text-muted mb-1"><i class="fas fa-user-slash me-1 text-warning"></i> Inactive Borrowers</p>
+                  <h5 class="fw-bold text-warning">{{ stats.inactive_borrowers }}</h5>
+                </div>
+              </div>
             </div>
-            <div class="col-md-2">
-              <p class="mb-1">Critical Loans</p>
-              <h5 class="text-danger">{{ stats.critical_loans }}</h5>
+            <div class="col">
+              <div class="card shadow-sm h-100">
+                <div class="card-body">
+                  <p class="text-muted mb-1"><i class="fas fa-exclamation-triangle me-1 text-danger"></i> Critical Loans</p>
+                  <h5 class="fw-bold text-danger">{{ stats.critical_loans }}</h5>
+                </div>
+              </div>
             </div>
-            <div class="col-md-2">
-              <p class="mb-1">Missing Contract</p>
-              <h5 class="text-warning">{{ stats.missing_contract }}</h5>
+            <div class="col">
+              <div class="card shadow-sm h-100">
+                <div class="card-body">
+                  <p class="text-muted mb-1"><i class="fas fa-file-alt me-1 text-warning"></i> Missing Contract</p>
+                  <h5 class="fw-bold text-warning">{{ stats.missing_contract }}</h5>
+                </div>
+              </div>
             </div>
-            <div class="col-md-2">
-              <p class="mb-1">Loans w/ Title</p>
-              <h5 class="text-success">{{ stats.title_loans }}</h5>
+            <div class="col">
+              <div class="card shadow-sm h-100">
+                <div class="card-body">
+                  <p class="text-muted mb-1"><i class="fas fa-key me-1 text-success"></i> Loans w/ Title</p>
+                  <h5 class="fw-bold text-success">{{ stats.title_loans }}</h5>
+                </div>
+              </div>
             </div>
-            <div class="col-md-2 mt-3">
-              <p class="mb-1">With Guarantor</p>
-              <h5 class="text-success">{{ stats.with_guarantor }}</h5>
+            <div class="col">
+              <div class="card shadow-sm h-100">
+                <div class="card-body">
+                  <p class="text-muted mb-1"><i class="fas fa-user-friends me-1 text-success"></i> With Guarantor</p>
+                  <h5 class="fw-bold text-success">{{ stats.with_guarantor }}</h5>
+                </div>
+              </div>
             </div>
-            <div class="col-md-2 mt-3">
-              <p class="mb-1">No Title & No Guarantor</p>
-              <h5>{{ stats.no_title_guarantor }}</h5>
+            <div class="col">
+              <div class="card shadow-sm h-100">
+                <div class="card-body">
+                  <p class="text-muted mb-1"><i class="fas fa-question-circle me-1 text-muted"></i> No Title & No Guarantor</p>
+                  <h5 class="fw-bold text-dark">{{ stats.no_title_guarantor }}</h5>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -62,18 +145,70 @@
     </div>
   </div>
 
-  <!-- Loan Health Charts -->
-  <div class="row mb-4">
-    <div class="col">
-      <div class="card shadow-sm">
+  <!-- Summary Panels: Critical, Delinquency, Title -->
+  <div class="row mt-2 mb-3 flex-wrap container-fluid px-3">
+    <div class="col-12 col-md-12 col-lg-4">
+      <div class="card shadow-sm h-100">
         <div class="card-body">
-          <h4 class="fw-bold mb-3">Loan Health Charts</h4>
-          <div class="row text-center">
-            {% for chart, data in charts_data.items() %}
-            <div class="col-md-2">
-              <canvas id="{{ chart }}Chart"></canvas>
+          <h5 class="fw-bold mb-3 text-danger"><i class="fas fa-exclamation-circle me-2"></i>Critical Loans</h5>
+          <div class="small">
+            <div class="alert alert-danger d-flex align-items-center mb-2" role="alert">
+              <i class="fas fa-ban me-2"></i> <strong>Critical:</strong> 138 (28%)
             </div>
-            {% endfor %}
+          </div>
+          <div class="small">
+            <div class="alert alert-success d-flex align-items-center mb-0" role="alert">
+              <i class="fas fa-check me-2"></i> <strong>Non-Critical:</strong> 360 (72%)
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h5 class="fw-bold mb-3 text-primary"><i class="fas fa-chart-line me-2"></i>Loan Delinquency</h5>
+          <div class="small">
+            <div class="alert alert-warning d-flex align-items-center mb-2" role="alert">
+              <i class="fas fa-exclamation-triangle me-2"></i> <strong>1W Behind:</strong> 30
+            </div>
+          </div>
+          <div class="small">
+            <div class="alert alert-warning text-orange d-flex align-items-center mb-2" role="alert" style="background-color: #ffe4b3;">
+              <i class="fas fa-exclamation-circle me-2"></i> <strong>2W Behind:</strong> 25
+            </div>
+          </div>
+          <div class="small">
+            <div class="alert alert-danger d-flex align-items-center mb-2" role="alert">
+              <i class="fas fa-ban me-2"></i> <strong>3+W Critical:</strong> 20
+            </div>
+          </div>
+          <div class="small">
+            <div class="alert alert-success d-flex align-items-center mb-2" role="alert">
+              <i class="fas fa-check me-2"></i> <strong>Finished:</strong> 40
+            </div>
+          </div>
+          <div class="small">
+            <div class="alert alert-secondary d-flex align-items-center mb-0" role="alert">
+              <i class="fas fa-circle me-2 text-muted"></i> <strong>New:</strong> 5
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h5 class="fw-bold mb-3 text-secondary"><i class="fas fa-file-alt me-2"></i>Title Status</h5>
+          <div class="small">
+            <div class="alert alert-success d-flex align-items-center mb-2" role="alert">
+              <i class="fas fa-check me-2"></i> <strong>Has Title:</strong> 315
+            </div>
+          </div>
+          <div class="small">
+            <div class="alert alert-danger d-flex align-items-center mb-0" role="alert">
+              <i class="fas fa-ban me-2"></i> <strong>No Title:</strong> 183
+            </div>
           </div>
         </div>
       </div>
@@ -81,45 +216,23 @@
   </div>
 </div>
 
-<!-- Embedded chart data -->
-<script id="chart-data" type="application/json">
-    {{ charts_data | tojson | safe }}
-</script>
-
 <!-- Embedded stats data (✅ new) -->
 <script id="stats-data" type="application/json">
     {{ stats | tojson | safe }}
 </script>
 
+<!-- Embedded breakdown data -->
+<script id="amount-breakdown-data" type="application/json">
+  {{ amount_breakdown | tojson | safe }}
+</script>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.3"></script>
 <script src="https://cdn.jsdelivr.net/npm/gaugeJS/dist/gauge.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {
-    const charts = JSON.parse(document.getElementById("chart-data").textContent);
     const stats = JSON.parse(document.getElementById("stats-data").textContent);
-
-    function drawPieChart(id, data) {
-      const ctx = document.getElementById(id).getContext("2d");
-      new Chart(ctx, {
-        type: "doughnut",
-        data: {
-          labels: Object.keys(data),
-          datasets: [{
-            data: Object.values(data),
-            backgroundColor: ["#4CAF50", "#FFC107", "#2196F3", "#F44336", "#9C27B0", "#FF5722"]
-          }]
-        },
-        options: {
-          cutout: "70%",
-          plugins: { legend: { position: 'bottom' } }
-        }
-      });
-    }
-
-    for (const chart in charts) {
-      drawPieChart(chart + "Chart", charts[chart]);
-    }
 
     const paid = Number(stats.paid_off || 0);
     const pastDue = Number(stats.loans_past_due || 0);
@@ -167,6 +280,127 @@
     gauge.setMinValue(0);
     gauge.set(paidPct);
     document.getElementById("paidOffText").textContent = paidPct + "% Paid Off";
+
+    // Dollar-based breakdown chart
+    const amountData = JSON.parse(document.getElementById("amount-breakdown-data").textContent);
+
+    const paidOffAmount = amountData["Paid Off"] || 0;
+    const totalLoanAmount = amountData["Total Loan Amount"] || 0;
+    const activeLoanAmount = totalLoanAmount - paidOffAmount;
+
+    const stackedData = {
+      labels: ["In Good Standing", "Paid Off", "Past Due", "Total Active Loans", "Total Loan Amount"],
+      datasets: [
+        {
+          label: "In Good Standing",
+          data: [
+            amountData["In Good Standing"] || 0,
+            0, 0, 0, 0
+          ],
+          backgroundColor: "#4CAF50"
+        },
+        {
+          label: "Paid Off",
+          data: [
+            0,
+            paidOffAmount,
+            0, 0, 0
+          ],
+          backgroundColor: "#9E9E9E"
+        },
+        {
+          label: "Past Due",
+          data: [
+            0, 0,
+            amountData["Past Due"] || 0,
+            0, 0
+          ],
+          backgroundColor: "#F44336"
+        },
+        {
+          label: "Total Active Loans",
+          data: [
+            0, 0, 0,
+            amountData["Total Active Loans"] || 0,
+            0
+          ],
+          backgroundColor: "#9C27B0"
+        },
+        {
+          label: "Total Loan - Paid Off",
+          data: [
+            0, 0, 0, 0,
+            paidOffAmount
+          ],
+          backgroundColor: "#A5D6A7"
+        },
+        {
+          label: "Total Loan - Remaining",
+          data: [
+            0, 0, 0, 0,
+            activeLoanAmount
+          ],
+          backgroundColor: "#42A5F5"
+        }
+      ]
+    };
+
+    const amtCtx = document.getElementById("loanAmountChart").getContext("2d");
+    new Chart(amtCtx, {
+      type: "bar",
+      data: stackedData,
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        plugins: {
+          datalabels: {
+            anchor: 'end',
+            align: 'end',
+            formatter: function (value) {
+              if (value === 0) return '';
+              return "$" + value.toLocaleString();
+            },
+            color: '#000',
+            font: {
+              weight: 'bold'
+            },
+            clamp: true,
+            clip: false
+          },
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function (context) {
+                return "$" + context.raw.toLocaleString();
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            stacked: true,
+            ticks: {
+              callback: function (value) {
+                return "$" + value.toLocaleString();
+              }
+            },
+            beginAtZero: true,
+            grace: "20%"
+          },
+          y: {
+            stacked: true
+          }
+        }
+      },
+      plugins: [ChartDataLabels],
+    });
   }); 
 </script>
+<style>
+  body {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+    overflow-x: hidden;
+  }
+</style>
 {% endblock %}

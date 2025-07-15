@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-3">
+  <h2 class="mb-4">Loan Summary Overview</h2>
+
+  <div class="row g-3">
+    <!-- Top Stats -->
+    <div class="col-md-3" style="font-weight:bold;">
+      <a href="{{ url_for('loan_summary.all_loans') }}" class="text-dark text-decoration-none">Total Loans: {{ stats.total_loans }}</a>
+    </div>
+    <div class="col-md-3" style="color:blue;">
+      <a href="{{ url_for('loan_summary.active_borrowers') }}" class="text-decoration-none" style="color:blue;">Active Borrowers: {{ stats.active_borrowers }}</a>
+    </div>
+    <div class="col-md-3" style="color:orange;">
+      <a href="{{ url_for('loan_summary.inactive_borrowers') }}" class="text-decoration-none" style="color:orange;">Inactive Borrowers: {{ stats.inactive_borrowers }}</a>
+    </div>
+    <div class="col-md-3" style="color:red;">
+      <a href="{{ url_for('loan_summary.critical_loans') }}" class="text-decoration-none" style="color:red;">Critical Loans: {{ stats.critical_loans }}</a>
+    </div>
+    <div class="col-md-3" style="color:gold;">
+      <a href="{{ url_for('loan_summary.missing_contracts') }}" class="text-decoration-none" style="color:gold;">Missing Contract: {{ stats.missing_contract }}</a>
+    </div>
+    <div class="col-md-3" style="color:green;">
+      <a href="{{ url_for('loan_summary.with_title') }}" class="text-decoration-none" style="color:green;">Loans w/ Title: {{ stats.title_loans }}</a>
+    </div>
+    <div class="col-md-3" style="color:green;">
+      <a href="{{ url_for('loan_summary.with_guarantor') }}" class="text-decoration-none" style="color:green;">With Guarantor: {{ stats.with_guarantor }}</a>
+    </div>
+    <div class="col-md-3" style="color:black;">
+      <a href="{{ url_for('loan_summary.no_title_guarantor') }}" class="text-decoration-none" style="color:black;">No Title & No Guarantor: {{ stats.no_title_no_guarantor }}</a>
+    </div>
+  </div>
+
+  <hr class="my-4">
+
+  <!-- Summary Boxes -->
+  <div class="row">
+    <div class="col-md-4">
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-warning text-white fw-bold">
+          <a href="{{ url_for('loan_summary.missing_contracts') }}" class="text-white text-decoration-none">📄 Missing Contracts - Top 10</a>
+        </div>
+        <ul class="list-group list-group-flush">
+          {% for loan in missing_contracts %}
+            <li class="list-group-item d-flex justify-content-between">
+              {{ loan['Borrower'] }}
+              <span>${{ '{:,.2f}'.format(loan['Principal Balance']) }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-danger text-white fw-bold">
+          <a href="{{ url_for('loan_summary.critical_loans') }}" class="text-white text-decoration-none">🚨 Critical Loans - Top 10</a>
+        </div>
+        <ul class="list-group list-group-flush">
+          {% for loan in critical_loans %}
+            <li class="list-group-item d-flex justify-content-between">
+              {{ loan['Borrower'] }}
+              <span>${{ '{:,.2f}'.format(loan['Principal Balance']) }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-secondary text-white fw-bold">
+          <a href="{{ url_for('loan_summary.no_title_guarantor') }}" class="text-white text-decoration-none">⛔ No Title & No Guarantor - Top 10</a>
+        </div>
+        <ul class="list-group list-group-flush">
+          {% for loan in no_title_guarantor %}
+            <li class="list-group-item d-flex justify-content-between">
+              {{ loan['Borrower'] }}
+              <span>${{ '{:,.2f}'.format(loan['Principal Balance']) }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

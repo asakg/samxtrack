@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid mt-4">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h3 class="fw-bold mb-3 text-danger">Critical Loans - Full List</h3>
+      <a href="/loan-summary" class="btn btn-sm btn-outline-secondary mb-3">&larr; Back to Summary</a>
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover table-sm table-striped">
+          <thead class="table-light">
+            <tr>
+              <th>Borrower</th>
+              <th>Principal Balance</th>
+              <th>Group</th>
+              <th>Status</th>
+              <th>Days Late</th>
+              <th>Contract</th>
+              <th>Title</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for loan in loans %}
+              <tr>
+                <td>{{ loan['Borrower'] }}</td>
+                <td><span class="badge bg-secondary">${{ '{:,.2f}'.format(loan['Principal Balance']) }}</span></td>
+                <td>{{ loan['Group'] }}</td>
+                <td>{{ loan['Status'] }}</td>
+                <td>{{ loan['Days Late'] }}</td>
+                <td>{{ 'Yes' if loan['Has Contract'] else 'No' }}</td>
+                <td>{{ 'Yes' if loan['Has Title'] else 'No' }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

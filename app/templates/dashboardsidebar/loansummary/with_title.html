@@ -1,0 +1,35 @@
+
+
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid mt-3">
+  <div class="card shadow-sm p-4">
+    <h3 class="mb-4 fw-bold">Loans With Title</h3>
+    <a href="{{ url_for('loan_summary.loan_summary') }}" class="btn btn-link mb-3">&larr; Back to Summary</a>
+    <div class="table-responsive">
+      <table class="table table-bordered table-sm table-hover table-striped">
+        <thead>
+          <tr>
+            <th>Borrower</th>
+            <th>Principal Balance</th>
+            <th>Status</th>
+            <th>Contract</th>
+            <th>Title</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for loan in loans %}
+            <tr>
+              <td>{{ loan['Borrower'] }}</td>
+              <td><span class="badge bg-success">${{ '{:,.2f}'.format(loan['Principal Balance']) }}</span></td>
+              <td>{{ loan['Activity Status'] }}</td>
+              <td>{{ 'Yes' if loan['Has Contract'] else 'No' }}</td>
+              <td>{{ 'Yes' if loan['Has Title'] else 'No' }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
