@@ -142,7 +142,7 @@ def run_download(headless: bool = True, echo: bool = True, also_run_reports_on_f
         )
         context = browser.new_context(accept_downloads=True)
         page = context.new_page()
-        page.set_default_timeout(90_000)
+        page.set_default_timeout(120_000)
 
         # 1) Go directly to Loans page (bypasses navbar/hamburger in headless)
         LOANS_URL = "https://v3.brytsoftware.com/Loans/Loans/Index"
@@ -156,12 +156,47 @@ def run_download(headless: bool = True, echo: bool = True, also_run_reports_on_f
                 page.click(SEL_LOGIN_BUTTON)
 
         # 3) Ensure we land on Loans and the export button is ready
-        page.goto(LOANS_URL, wait_until="networkidle")
-        page.wait_for_selector(SEL_EXPORT_TO_EXCEL, state="visible")
+        page.goto(LOANS_URL, wait_until="domcontentloaded")
+        page.wait_for_url(lambda url: "/Loans/Loans/Index" in url, timeout=90_000)
+        page.wait_for_load_state("networkidle")
+
+        # Some pages render a Kendo toolbar; wait for it if present
+        try:
+            page.wait_for_selector(".k-toolbar, .k-grid-toolbar", state="visible", timeout=20_000)
+        except Exception:
+            pass  # not fatal; continue
+
+        # Bryt has used a few different selectors for the Excel export button over time.
+        possible_export_selectors = [
+            SEL_EXPORT_TO_EXCEL,           # button[data-role='excel']
+            ".k-grid-excel",               # common Kendo class
+            "button:has-text('Export to Excel')",
+            "text=Export to Excel",        # text fallback
+        ]
+
+        excel_btn = None
+        for sel in possible_export_selectors:
+            try:
+                excel_btn = page.wait_for_selector(sel, state="visible", timeout=20_000)
+                if excel_btn:
+                    break
+            except Exception:
+                continue
+
+        if not excel_btn:
+            # Write debug artifacts to help troubleshoot
+            debug_dir = DATA_DIR / "debug"
+            debug_dir.mkdir(parents=True, exist_ok=True)
+            (debug_dir / "loans_page_debug.html").write_text(page.content())
+            try:
+                page.screenshot(path=(debug_dir / "loans_page_debug.png").as_posix(), full_page=True)
+            except Exception:
+                pass
+            raise RuntimeError("Could not locate the 'Export to Excel' button on Loans page. Debug saved to data/debug/")
 
         # 4) Export & capture download
         with page.expect_download() as dl_info:
-            page.click(SEL_EXPORT_TO_EXCEL)
+            excel_btn.click()
         download = dl_info.value
 
         download.save_as(TMP_XLSX.as_posix())
