@@ -96,7 +96,7 @@ def _get_bryt_creds() -> tuple[str, str]:
     Region default: us-east-1
     """
     secret_name = os.getenv("BRYT_SECRET_NAME", "samxtrack/bryt-login")
-    region_name = os.getenv("AWS_REGION", "us-east-1")
+    region_name = os.getenv("AWS_REGION", "us-east-2")
 
     try:
         client = boto3.client("secretsmanager", region_name=region_name)
