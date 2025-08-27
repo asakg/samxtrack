@@ -142,19 +142,21 @@ def run_download(headless: bool = True, echo: bool = True, also_run_reports_on_f
         )
         context = browser.new_context(accept_downloads=True)
         page = context.new_page()
+        page.set_default_timeout(90_000)
 
-        # 1) Navigate (login page redirects if not authenticated)
-        page.goto("https://v3.brytsoftware.com/Loans/Loans/Index")
+        # 1) Go directly to Loans page (bypasses navbar/hamburger in headless)
+        LOANS_URL = "https://v3.brytsoftware.com/Loans/Loans/Index"
+        page.goto(LOANS_URL, wait_until="domcontentloaded")
 
-        # 2) Login
-        page.fill(SEL_USERNAME_INPUT, username)
-        page.fill(SEL_PASSWORD_INPUT, password)
-        page.click(SEL_LOGIN_BUTTON)
+        # 2) If redirected to login, submit credentials
+        if page.query_selector(SEL_USERNAME_INPUT):
+            page.fill(SEL_USERNAME_INPUT, username)
+            page.fill(SEL_PASSWORD_INPUT, password)
+            with page.expect_navigation(wait_until="networkidle"):
+                page.click(SEL_LOGIN_BUTTON)
 
-        # 3) Navigate to Loans & wait for grid
-        page.wait_for_selector(SEL_LOANS_LINK)
-        page.click(SEL_LOANS_LINK)
-        page.wait_for_load_state("networkidle")
+        # 3) Ensure we land on Loans and the export button is ready
+        page.goto(LOANS_URL, wait_until="networkidle")
         page.wait_for_selector(SEL_EXPORT_TO_EXCEL, state="visible")
 
         # 4) Export & capture download

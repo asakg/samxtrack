@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 from apscheduler.schedulers.blocking import BlockingScheduler
@@ -10,6 +10,7 @@ from apscheduler.triggers.cron import CronTrigger
 
 import json
 import pandas as pd
+from utils import load_latest_loans
 
 try:
     from zoneinfo import ZoneInfo  # py39+
