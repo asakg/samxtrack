@@ -117,6 +117,16 @@ def dashboard_home():
         "Total Loan Amount": float(total_loan_amt)
     }
 
+    # Percentage version of amount breakdown for users without dollar access
+    denom = total_loan_amt if total_loan_amt else 1.0
+    amount_breakdown_pct = {
+        "Paid Off": round((paid_off_amt / denom) * 100, 1),
+        "In Good Standing": round((good_amt / denom) * 100, 1),
+        "Past Due": round((past_due_amt / denom) * 100, 1),
+        "Total Active Loans": round((total_active_loans_amt / denom) * 100, 1),
+        "Total Loan Amount": 100.0,
+    }
+
     bar_colors = {
         "In Good Standing": "#4CAF50",     # Green
         "Paid Off": "#9E9E9E",             # Grey
@@ -133,5 +143,7 @@ def dashboard_home():
         stats_block3=stats_block3,
         medium_risk_rows=medium_risk_df.to_dict(orient="records"),
         amount_breakdown=amount_breakdown,
-        bar_colors=bar_colors
+        amount_breakdown_pct=amount_breakdown_pct,
+        bar_colors=bar_colors,
+        show_amounts=session.get("show_amounts", False),
     )

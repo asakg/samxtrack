@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    :root{
+      --ink:#1e293b;
+      --bg:#f8fafc;
+      --card:#ffffff;
+      --shadow:0 2px 4px rgba(0,0,0,0.05);
+      --ok:#22c55e;
+      --bad:#ef4444;
+      --muted:#64748b;
+      --line:#e2e8f0;
+    }
+
+    body{
+      font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin:20px;
+      background-color:var(--bg);
+      color:var(--ink);
+    }
+    h1{
+      font-size:24px;
+      font-weight:700;
+      margin:0 0 14px 0;
+    }
+
+    /* ===== SUMMARY (counters + meter) ===== */
+    .summary{
+      page-break-inside:avoid;
+      background:transparent;
+      margin-bottom:10px;
+    }
+    .summary-wrap{
+      display:flex;
+      gap:14px;
+      align-items:stretch;
+    }
+    .kpis{
+      display:grid;
+      grid-template-columns:repeat(1,1fr);
+      gap:10px;
+      min-width:120px;
+      flex:1;
+    }
+    .kpi{
+      background:var(--card);
+      border-radius:8px;
+      padding:12px 14px;
+      box-shadow:var(--shadow);
+      text-align:center;
+      font-weight:600;
+      font-size:14px;
+    }
+    .kpi .val{ display:block; font-size:16px; margin-top:2px; }
+
+    .meter-card{
+      flex:2;
+      background:var(--card);
+      border-radius:8px;
+      box-shadow:var(--shadow);
+      padding:10px 12px;
+      display:block;
+    }
+    .meter-title{
+      font-weight:600;
+      font-size:13px;
+      margin-bottom:8px;
+      color:var(--muted);
+      text-align:center;
+    }
+    .meterbar{ width:100%; border-collapse:collapse; table-layout:fixed; }
+    .meterbar td{
+      height:20px; color:#fff; font-size:12px; white-space:nowrap;
+    }
+    .meterbar td.ok{ background:var(--ok); text-align:right; padding-right:4px; }
+    .meterbar td.bad{ background:var(--bad); text-align:left; padding-left:4px; }
+
+    .legend{
+      display:flex; justify-content:center; gap:16px;
+      margin-top:8px; font-size:12px; color:var(--muted);
+    }
+    .chip{ display:inline-flex; align-items:center; gap:6px; }
+    .dot{ width:10px; height:10px; border-radius:2px; display:inline-block; }
+    .dot.ok{ background:var(--ok); } .dot.bad{ background:var(--bad); }
+    .chip b{ color:var(--ink); }
+
+    /* ===== CONTENT SECTIONS ===== */
+    /* Use block layout for print so WeasyPrint can break naturally. */
+    .sections{ display:block; margin-top:10px; }
+    .section{
+      background:var(--card);
+      border-radius:8px;
+      box-shadow:var(--shadow);
+      padding:12px;
+      margin-bottom:14px;
+      break-inside:auto;
+      page-break-inside:auto;
+    }
+
+    .section-title{
+      font-size:16px; font-weight:700; margin:0 0 8px 0;
+      display:flex; align-items:center; gap:8px;
+    }
+
+    table{ width:100%; border-collapse:collapse; font-size:13px; }
+    th,td{ padding:6px; border-bottom:1px solid var(--line); text-align:left; }
+    th{ background:#e2e8f0; color:var(--ink); }
+
+    .contacted-row{ background:#ecfdf5; }
+    .not-contacted-row{ background:#fef2f2; }
+    .subsection-title{ font-weight:700; font-size:14px; margin:10px 0 6px; }
+
+    /* ===== Print friendliness ===== */
+    @page{ size:Letter; margin:22mm; }
+    /* Flex containers often don’t break in WeasyPrint. Keep summary flex, but sections block. */
+    @media print{
+      .summary-wrap{ display:flex; }
+      .sections{ display:block; }
+    }
+  </style>
+</head>
+<body>
+  <h1>📞 Take Action Report – Week of {{ week }}</h1>
+
+  <!-- ===== SUMMARY ===== -->
+  <div class="summary">
+    <div class="summary-wrap">
+      <div class="kpis">
+        <div class="kpi">Total Entries:<span class="val">{{ total }}</span></div>
+      </div>
+
+      <div class="meter-card">
+        <div class="meter-title">Contacted vs Not Contacted</div>
+        <table class="meterbar" role="presentation" aria-hidden="true">
+          <tr>
+            <td class="ok"  width="{{ contacted_pct }}">{{ contacted_pct }}</td>
+            <td class="bad" width="{{ not_contacted_pct }}">{{ not_contacted_pct }}</td>
+          </tr>
+        </table>
+        <div class="legend">
+          <span class="chip"><span class="dot ok"></span>
+            <span>Contacted <b>{{ contacted_pct }}</b> ({{ contacted }})</span>
+          </span>
+          <span class="chip"><span class="dot bad"></span>
+            <span>Not Contacted <b>{{ not_contacted_pct }}</b> ({{ not_contacted }})</span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CONTENT ===== -->
+  <div class="sections">
+    <div class="section">
+      <div class="section-title">🔥 High Risk Borrowers (21+ Days Late)</div>
+
+      {% if high_risk.contacted %}
+      <div class="subsection-title">✅ Contacted</div>
+      <table>
+        <tr><th>Borrower</th><th>Balance</th><th>Note</th></tr>
+        {% for entry in high_risk.contacted %}
+        <tr class="contacted-row">
+          <td>{{ entry.borrower }}</td>
+          <td>{{ entry.balance }}</td>
+          <td>{{ entry.note }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+      {% endif %}
+
+      {% if high_risk.not_contacted %}
+      <div class="subsection-title">❌ Not Contacted</div>
+      <table>
+        <tr><th>Borrower</th><th>Balance</th><th>Note</th></tr>
+        {% for entry in high_risk.not_contacted %}
+        <tr class="not-contacted-row">
+          <td>{{ entry.borrower }}</td>
+          <td>{{ entry.balance }}</td>
+          <td>{{ entry.note }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+      {% endif %}
+    </div>
+
+    <div class="section">
+      <div class="section-title">⚠️ Critical Borrowers (No Title & No Guarantor)</div>
+
+      {% if critical.contacted %}
+      <div class="subsection-title">✅ Contacted</div>
+      <table>
+        <tr><th>Borrower</th><th>Balance</th><th>Note</th></tr>
+        {% for entry in critical.contacted %}
+        <tr class="contacted-row">
+          <td>{{ entry.borrower }}</td>
+          <td>{{ entry.balance }}</td>
+          <td>{{ entry.note }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+      {% endif %}
+
+      {% if critical.not_contacted %}
+      <div class="subsection-title">❌ Not Contacted</div>
+      <table>
+        <tr><th>Borrower</th><th>Balance</th><th>Note</th></tr>
+        {% for entry in critical.not_contacted %}
+        <tr class="not-contacted-row">
+          <td>{{ entry.borrower }}</td>
+          <td>{{ entry.balance }}</td>
+          <td>{{ entry.note }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+      {% endif %}
+    </div>
+  </div>
+</body>
+</html>

@@ -61,7 +61,11 @@
       <div class="card shadow-sm h-100">
         <div class="card-body">
           <h4 class="fw-bold mb-3">Total Loan Amount Breakdown</h4>
+          {% if show_amounts %}
           <h6 class="text-muted">Total Loan Amount: ${{ "{:,.2f}".format(amount_breakdown["Total Loan Amount"] or 0) }}</h6>
+          {% else %}
+          <h6 class="text-muted">Total Loan Amount: {{ amount_breakdown_pct.get("Total Loan Amount", 0) }}%</h6>
+          {% endif %}
           <canvas id="loanAmountChart" height="130"></canvas>
         </div>
       </div>
@@ -225,6 +229,12 @@
 <script id="amount-breakdown-data" type="application/json">
   {{ amount_breakdown | tojson | safe }}
 </script>
+<script id="amount-breakdown-data-pct" type="application/json">
+  {{ amount_breakdown_pct | tojson | safe }}
+</script>
+<script id="show-amounts-flag" type="application/json">
+  {{ show_amounts | tojson }}
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.3"></script>
 <script src="https://cdn.jsdelivr.net/npm/gaugeJS/dist/gauge.min.js"></script>
@@ -281,8 +291,9 @@
     gauge.set(paidPct);
     document.getElementById("paidOffText").textContent = paidPct + "% Paid Off";
 
-    // Dollar-based breakdown chart
-    const amountData = JSON.parse(document.getElementById("amount-breakdown-data").textContent);
+    // Use dollars for privileged users; percentages for others
+    const showAmounts = JSON.parse(document.getElementById("show-amounts-flag").textContent);
+    const amountData = JSON.parse(document.getElementById(showAmounts ? "amount-breakdown-data" : "amount-breakdown-data-pct").textContent);
 
     const paidOffAmount = amountData["Paid Off"] || 0;
     const totalLoanAmount = amountData["Total Loan Amount"] || 0;
@@ -358,12 +369,10 @@
             align: 'end',
             formatter: function (value) {
               if (value === 0) return '';
-              return "$" + value.toLocaleString();
+              return showAmounts ? ("$" + Number(value).toLocaleString()) : (Number(value).toFixed(1) + "%");
             },
             color: '#000',
-            font: {
-              weight: 'bold'
-            },
+            font: { weight: 'bold' },
             clamp: true,
             clip: false
           },
@@ -371,7 +380,8 @@
           tooltip: {
             callbacks: {
               label: function (context) {
-                return "$" + context.raw.toLocaleString();
+                const v = context.raw;
+                return showAmounts ? ("$" + Number(v).toLocaleString()) : (Number(v).toFixed(1) + "%");
               }
             }
           }
@@ -381,7 +391,7 @@
             stacked: true,
             ticks: {
               callback: function (value) {
-                return "$" + value.toLocaleString();
+                return showAmounts ? ("$" + Number(value).toLocaleString()) : (Number(value).toFixed(0) + "%");
               }
             },
             beginAtZero: true,

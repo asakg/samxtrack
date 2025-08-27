@@ -52,7 +52,7 @@ def show_take_action():
 
     def row_entry(row, category):
         key = row["Loan Key"]
-        match = next((x for x in past_entries if x["loan_key"] == key), {})
+        match = next((x for x in past_entries if x.get("loan_key") == key), {})
         return {
             "loan_key": key,
             "borrower": row["Borrower"],

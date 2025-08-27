@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>CEO – Must Contact Report</title>
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, sans-serif; background:#f6f8fb; margin: 24px; color:#0f172a; }
+    .wrap { background:#eef2f6; border-radius:12px; padding:28px; }
+    h1 { margin:0 0 8px; font-size:28px; letter-spacing:.3px; }
+    .sub { color:#64748b; margin:0 0 20px; font-size:16px; }
+    .section-title { margin:22px 0 8px; font-size:18px; font-weight:700; }
+    table { width:100%; border-collapse:collapse; background:#fff; border-radius:10px; overflow:hidden; }
+    th, td { padding:10px 12px; border-bottom:1px solid #e2e8f0; text-align:left; font-size:14px; }
+    th { background:#f1f5f9; color:#334155; font-weight:700; }
+    .empty { color:#64748b; font-style:italic; margin-top:6px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>CEO – Must Contact Report</h1>
+    <p class="sub">Week of {{ week }} • Note = “{{ expected_note }}”</p>
+
+    {% set has_any = (high_rows|length) + (critical_rows|length) > 0 %}
+    {% if not has_any %}
+      <p class="empty">No matching borrowers this week.</p>
+    {% else %}
+
+      {% if high_rows %}
+        <div class="section-title">🔥 High Risk Borrowers (21+ Days Late)</div>
+        <table>
+          <thead>
+            <tr><th>Borrower</th><th>Balance</th><th>Days Late</th><th>Note</th></tr>
+          </thead>
+          <tbody>
+            {% for r in high_rows %}
+              <tr>
+                <td>{{ r.borrower }}</td>
+                <td>{{ r.balance_fmt }}</td>
+                <td>{{ r.days_late }}</td>
+                <td>{{ r.note }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% endif %}
+
+      {% if critical_rows %}
+        <div class="section-title">⚠️ Critical Borrowers (No Title &amp; No Guarantor)</div>
+        <table>
+          <thead>
+            <tr><th>Borrower</th><th>Balance</th><th>Days Late</th><th>Note</th></tr>
+          </thead>
+          <tbody>
+            {% for r in critical_rows %}
+              <tr>
+                <td>{{ r.borrower }}</td>
+                <td>{{ r.balance_fmt }}</td>
+                <td>{{ r.days_late }}</td>
+                <td>{{ r.note }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% endif %}
+
+    {% endif %}
+  </div>
+</body>
+</html>
