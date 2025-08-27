@@ -86,6 +86,16 @@ def _extract_max_week_tag(xlsx_path: Path) -> str | None:
     except Exception:
         return None
 
+def _dump_debug(page, label="debug"):
+    try:
+        dbg_dir = DATA_DIR / "debug"
+        dbg_dir.mkdir(parents=True, exist_ok=True)
+        (dbg_dir / f"{label}.html").write_text(page.content())
+        page.screenshot(path=(dbg_dir / f"{label}.png").as_posix(), full_page=True)
+        print(f"[debug] wrote {(dbg_dir / f'{label}.html').as_posix()} and {(dbg_dir / f'{label}.png').as_posix()}")
+    except Exception as e:
+        print("[debug] failed to write debug artifacts:", e)
+
 # ---------------------------
 # Secrets
 # ---------------------------
@@ -147,31 +157,44 @@ def run_download(headless: bool = True, echo: bool = True, also_run_reports_on_f
         # 1) Go directly to Loans page (bypasses navbar/hamburger in headless)
         LOANS_URL = "https://v3.brytsoftware.com/Loans/Loans/Index"
         page.goto(LOANS_URL, wait_until="domcontentloaded")
+        print("[nav] landed on:", page.url)
 
         # 2) If redirected to login, submit credentials
-        if page.query_selector(SEL_USERNAME_INPUT):
-            page.fill(SEL_USERNAME_INPUT, username)
-            page.fill(SEL_PASSWORD_INPUT, password)
-            with page.expect_navigation(wait_until="networkidle"):
-                page.click(SEL_LOGIN_BUTTON)
+        try:
+            if page.query_selector(SEL_USERNAME_INPUT):
+                page.fill(SEL_USERNAME_INPUT, username)
+                page.fill(SEL_PASSWORD_INPUT, password)
+                with page.expect_navigation(wait_until="networkidle", timeout=90_000):
+                    page.click(SEL_LOGIN_BUTTON)
+                print("[login] after login at:", page.url)
+        except Exception as e:
+            print("[login] error:", e)
+            _dump_debug(page, "login_error")
+            raise
 
         # 3) Ensure we land on Loans and the export button is ready
-        page.goto(LOANS_URL, wait_until="domcontentloaded")
-        page.wait_for_url(lambda url: "/Loans/Loans/Index" in url, timeout=90_000)
-        page.wait_for_load_state("networkidle")
-
-        # Some pages render a Kendo toolbar; wait for it if present
         try:
-            page.wait_for_selector(".k-toolbar, .k-grid-toolbar", state="visible", timeout=20_000)
-        except Exception:
-            pass  # not fatal; continue
+            page.goto(LOANS_URL, wait_until="domcontentloaded")
+            page.wait_for_url(lambda u: "/Loans/Loans/Index" in u, timeout=90_000)
+            page.wait_for_load_state("networkidle")
+            # Some pages render a Kendo toolbar; wait for it if present
+            try:
+                page.wait_for_selector(".k-toolbar, .k-grid-toolbar, .k-grid", state="visible", timeout=30_000)
+            except Exception:
+                pass
+            print("[loans] ready at:", page.url)
+        except Exception as e:
+            print("[loans] load error:", e)
+            _dump_debug(page, "loans_load_error")
+            raise
 
-        # Bryt has used a few different selectors for the Excel export button over time.
+        # 4) Locate export button (several fallbacks)
         possible_export_selectors = [
             SEL_EXPORT_TO_EXCEL,           # button[data-role='excel']
             ".k-grid-excel",               # common Kendo class
             "button:has-text('Export to Excel')",
-            "text=Export to Excel",        # text fallback
+            "text=Export to Excel",
+            "button[title*='Excel' i]",
         ]
 
         excel_btn = None
@@ -179,30 +202,29 @@ def run_download(headless: bool = True, echo: bool = True, also_run_reports_on_f
             try:
                 excel_btn = page.wait_for_selector(sel, state="visible", timeout=20_000)
                 if excel_btn:
+                    print(f"[export] found button via selector: {sel}")
                     break
             except Exception:
                 continue
 
         if not excel_btn:
-            # Write debug artifacts to help troubleshoot
-            debug_dir = DATA_DIR / "debug"
-            debug_dir.mkdir(parents=True, exist_ok=True)
-            (debug_dir / "loans_page_debug.html").write_text(page.content())
-            try:
-                page.screenshot(path=(debug_dir / "loans_page_debug.png").as_posix(), full_page=True)
-            except Exception:
-                pass
-            raise RuntimeError("Could not locate the 'Export to Excel' button on Loans page. Debug saved to data/debug/")
+            _dump_debug(page, "no_export_button")
+            raise RuntimeError("Could not locate the 'Export to Excel' button on Loans page.")
 
-        # 4) Export & capture download
-        with page.expect_download() as dl_info:
-            excel_btn.click()
-        download = dl_info.value
+        # 5) Export & capture download
+        try:
+            with page.expect_download(timeout=120_000) as dl_info:
+                excel_btn.click()
+            download = dl_info.value
+        except Exception as e:
+            print("[export] download error:", e)
+            _dump_debug(page, "download_error")
+            raise
 
         download.save_as(TMP_XLSX.as_posix())
         out["tmp"] = TMP_XLSX.as_posix()
 
-        # 5) Promote to latest (always overwrite)
+        # 6) Promote to latest (always overwrite)
         LATEST_XLSX.write_bytes(TMP_XLSX.read_bytes())
         out["latest"] = LATEST_XLSX.as_posix()
 
@@ -212,7 +234,7 @@ def run_download(headless: bool = True, echo: bool = True, also_run_reports_on_f
             print(f"ℹ️  latest_loans.xlsx: {LATEST_XLSX}")
             print(f"ℹ️  New tmp hash     : {new_hash}")
 
-        # 6) Friday snapshot (America/Chicago)
+        # 7) Friday snapshot (America/Chicago)
         # We detect Friday by *local time* unless the scheduler enforces CRON_TZ.
         # If you always set CRON_TZ=America/Chicago in crontab, this simple check is enough.
         if datetime.now().weekday() == 4:  # 0=Mon ... 4=Fri
