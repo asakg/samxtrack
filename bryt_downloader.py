@@ -39,6 +39,10 @@ SEL_LOGIN_BUTTON     = "button[type='submit']"
 SEL_LOANS_LINK       = "a[href='/Loans/Loans/Index']"
 SEL_EXPORT_TO_EXCEL  = "button[data-role='excel']"
 
+# Kendo toolbar overflow support
+SEL_OVERFLOW_TOGGLE  = ".k-overflow-anchor, .k-overflow-button, .k-toolbar .k-button[aria-haspopup='true']"
+SEL_OVERFLOW_MENU    = ".k-animation-container .k-popup, .k-overflow-container, .k-menu-popup, .k-popup, .k-menu"
+
 # ---------------------------
 # Paths
 # ---------------------------
@@ -221,6 +225,8 @@ def run_download(headless: bool = True, echo: bool = True, also_run_reports_on_f
         ]
 
         excel_btn = None
+
+        # First, try to find a visible export button on the page
         for sel in possible_export_selectors:
             try:
                 excel_btn = page.wait_for_selector(sel, state="visible", timeout=20_000)
@@ -229,6 +235,34 @@ def run_download(headless: bool = True, echo: bool = True, also_run_reports_on_f
                     break
             except Exception:
                 continue
+
+        # If not found, the button is likely hidden in a Kendo overflow menu.
+        if not excel_btn:
+            try:
+                toggle = page.wait_for_selector(SEL_OVERFLOW_TOGGLE, timeout=8_000)
+                toggle.click()
+                # wait for an overflow/menu popup to appear
+                page.wait_for_selector(SEL_OVERFLOW_MENU, state="visible", timeout=8_000)
+
+                # Now search *inside* the overflow container for the export item
+                menu_export_selectors = [
+                    f"{SEL_OVERFLOW_MENU} .k-item:has-text('Export to Excel')",
+                    f"{SEL_OVERFLOW_MENU} [data-command='excel']",
+                    f"{SEL_OVERFLOW_MENU} button:has-text('Export to Excel')",
+                    f"{SEL_OVERFLOW_MENU} button:has-text('Excel')",
+                    f"{SEL_OVERFLOW_MENU} .k-grid-excel",
+                ]
+
+                for msel in menu_export_selectors:
+                    try:
+                        excel_btn = page.wait_for_selector(msel, state="visible", timeout=6_000)
+                        if excel_btn:
+                            print(f"[export] found overflow menu item via selector: {msel}")
+                            break
+                    except Exception:
+                        continue
+            except Exception as e:
+                print("[export] overflow menu not found or not needed:", e)
 
         if not excel_btn:
             _dump_debug(page, "no_export_button")
