@@ -152,7 +152,7 @@ def run_download(headless: bool = True, echo: bool = True, also_run_reports_on_f
         )
         context = browser.new_context(accept_downloads=True)
         page = context.new_page()
-        page.set_default_timeout(120_000)
+        page.set_default_timeout(180_000)
 
         # 1) Go directly to Loans page (bypasses navbar/hamburger in headless)
         LOANS_URL = "https://v3.brytsoftware.com/Loans/Loans/Index"
@@ -174,15 +174,36 @@ def run_download(headless: bool = True, echo: bool = True, also_run_reports_on_f
 
         # 3) Ensure we land on Loans and the export button is ready
         try:
+            # Try direct nav first
             page.goto(LOANS_URL, wait_until="domcontentloaded")
-            page.wait_for_url(lambda u: "/Loans/Loans/Index" in u, timeout=90_000)
             page.wait_for_load_state("networkidle")
-            # Some pages render a Kendo toolbar; wait for it if present
+
+            # If we didn't land on the loans page, or export button isn't present yet,
+            # try to click the Loans nav link (works even if the UI redirects after login).
+            need_nav = False
             try:
-                page.wait_for_selector(".k-toolbar, .k-grid-toolbar, .k-grid", state="visible", timeout=30_000)
+                # When we're already on Loans the URL usually contains "/Loans/"
+                if "/Loans/" not in page.url:
+                    need_nav = True
+            except Exception:
+                need_nav = True
+
+            if need_nav:
+                # Click the Loans menu item if present
+                try:
+                    loans_link = page.wait_for_selector("a[href='/Loans/Loans/Index'], a:has-text('Loans')", timeout=20_000)
+                    loans_link.click()
+                    page.wait_for_load_state("networkidle")
+                except Exception:
+                    pass
+
+            # Give Kendo grid/toolbar time to render if present
+            try:
+                page.wait_for_selector(".k-grid, .k-grid-toolbar, .k-toolbar", state="visible", timeout=30_000)
             except Exception:
                 pass
-            print("[loans] ready at:", page.url)
+
+            print("[loans] at:", page.url)
         except Exception as e:
             print("[loans] load error:", e)
             _dump_debug(page, "loans_load_error")
@@ -195,6 +216,8 @@ def run_download(headless: bool = True, echo: bool = True, also_run_reports_on_f
             "button:has-text('Export to Excel')",
             "text=Export to Excel",
             "button[title*='Excel' i]",
+            "button:has-text('Excel')",
+            "[data-command='excel']",
         ]
 
         excel_btn = None
